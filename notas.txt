@@ -3,3 +3,7 @@ newsplease funciona
 - BIEN: la nacion
 - TODO MENOS TEXTO: el destape, 
 - NO FUNCIONA: infobae
+
+newspaper: clarin, pagina12, la nacion (menos autor)
+feedparser: infobae
+
