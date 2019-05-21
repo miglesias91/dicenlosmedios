@@ -8,4 +8,5 @@ class Noticia(Contenido):
         self.imagen = ""
         self.tags = []
         self.autor = 0
+        self.palabras_claves = []
         self.fecha = ""

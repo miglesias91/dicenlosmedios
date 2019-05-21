@@ -1,0 +1,47 @@
+lanacion:
+  feeds:
+    - tag: "politica"
+      url: "http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=30"
+    - tag: "economia"
+      url: "http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=272"
+    - tag: "sociedad"
+      url: "http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=7773"
+    - tag: "internacional"
+      url: "http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=7"
+
+clarin:
+  feeds:
+    - tag: "politica"
+      url: "https://www.clarin.com/rss/politica/"
+    - tag: "economia"
+      url: "https://www.clarin.com/rss/economia/"
+    - tag: "sociedad"
+      url: "https://www.clarin.com/rss/sociedad/"
+    - tag: "internacional"
+      url: "https://www.clarin.com/rss/mundo/"
+
+infobae:
+  feeds:
+    - tag: "politica"
+      url: "https://www.infobae.com/feeds/rss/sites/politica/"
+    - tag: "economia"
+      url: "https://www.infobae.com/feeds/rss/sites/economia/"
+    - tag: "sociedad"
+      url: "https://www.infobae.com/feeds/rss/sites/sociedad/"
+    - tag: "internacional"
+      url: "https://www.infobae.com/feeds/rss/sites/mundo/"
+
+
+paginadoce:
+  feeds:
+    - tag: "politica"
+      url: "https://www.pagina12.com.ar/rss/secciones/el-pais/notas"
+    - tag: "economia"
+      url: "https://www.pagina12.com.ar/rss/secciones/economia/notas"
+    - tag: "sociedad"
+      url: "https://www.pagina12.com.ar/rss/secciones/sociedad/notas"
+    - tag: "internacional"
+      url: "https://www.pagina12.com.ar/rss/secciones/el-mundo/notas"
+
+eldestape:
+  - todo: "https://www.eldestapeweb.com/sitemap-news.xml"
