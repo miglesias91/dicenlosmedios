@@ -44,4 +44,6 @@ paginadoce:
       url: "https://www.pagina12.com.ar/rss/secciones/el-mundo/notas"
 
 eldestape:
-  - todo: "https://www.eldestapeweb.com/sitemap-news.xml"
+  feeds:
+    - tag: "todo"
+      url: "https://www.eldestapeweb.com/sitemap-news.xml"
