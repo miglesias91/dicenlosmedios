@@ -6,7 +6,6 @@ class Diario(Medio):
 
     def __init__(self, etiqueta):
         Medio.__init__(self, etiqueta)
-        self.noticias = []
         self.periodistas = {}
         self.categorias = {}
         self.feeds = {}
@@ -24,7 +23,13 @@ class Diario(Medio):
             self.feeds[feed["tag"]] = feed["url"]         
 
     def leer(self):
+        for tag, url_feed in self.feeds.items():
+            for url_noticia in self.reconocer_urls_noticias(url_feed=url_feed):
+                noticia = self.nueva_noticia(url=url_noticia)
+                self.categorias[tag].append(noticia)
+
+    def reconocer_urls_noticias(self, url_feed):
         raise NotImplementedError()
 
-    def nueva_noticia(self, titulo, descripcion, texto, palabras_claves, imagen_url):
+    def nueva_noticia(self, url):
         raise NotImplementedError()
