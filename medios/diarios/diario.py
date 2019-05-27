@@ -1,6 +1,10 @@
+import dateutil
 import yaml
+import feedparser as fp
+import newspaper as np
 
 from medios.medio import Medio
+from medios.diarios.noticia import Noticia
 
 class Diario(Medio):
 
@@ -24,12 +28,25 @@ class Diario(Medio):
 
     def leer(self):
         for tag, url_feed in self.feeds.items():
-            for url_noticia in self.reconocer_urls_noticias(url_feed=url_feed):
+            self.categorias[tag] = []
+            for url_noticia, fecha in self.reconocer_urls_y_fechas_noticias(url_feed=url_feed):
                 noticia = self.nueva_noticia(url=url_noticia)
+                if(noticia.fecha == None):
+                    noticia.fecha = fecha
                 self.categorias[tag].append(noticia)
 
-    def reconocer_urls_noticias(self, url_feed):
-        raise NotImplementedError()
+    def reconocer_urls_y_fechas_noticias(self, url_feed):
+        urls_y_fechas = []
+        for entrada in fp.parse(url_feed).entries:
+            fecha = self.parsear_fecha(entrada)
+            urls_y_fechas.append((entrada.link, fecha))
+        return urls_y_fechas
 
     def nueva_noticia(self, url):
-        raise NotImplementedError()
+        articulo = np.Article(url=url, language='es')
+        articulo.download()
+        articulo.parse()
+        return Noticia(articulo.title, articulo.text, articulo.publish_date, url)
+
+    def parsear_fecha(self, entrada):
+        return dateutil.parser.parse(entrada.published)

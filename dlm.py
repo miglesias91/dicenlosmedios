@@ -8,8 +8,8 @@ p12 = PaginaDoce()
 
 # clarin.leer()
 # lanacion.leer()
-infobae.leer()
-# p12.leer()
+# infobae.leer()
+p12.leer()
 # eldestape.leer()
 hola = 0
 
