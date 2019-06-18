@@ -435,6 +435,7 @@ unxs
 usted
 ustedes
 versus
+vez
 via
 vos
 vosostras
