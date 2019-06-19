@@ -15,6 +15,7 @@ ano
 anos
 ante
 antes
+año
 aquel
 aquella
 aquellas

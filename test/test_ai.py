@@ -37,5 +37,9 @@ class TestFreq(unittest.TestCase):
         print(modelo.wv.most_similar('alicia', topn=5))
         print(modelo.wv.most_similar('gato', topn=5))
 
+    def test_stopwords(self):
+        locales_stopwords = codecs.open("stopwords.txt", 'r', encoding="utf-8").read().split("\r\n")
+        pass
+
 if __name__ == '__main__':
     unittest.main()
