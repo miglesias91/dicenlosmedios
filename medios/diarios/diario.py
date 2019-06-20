@@ -22,7 +22,8 @@ class Diario(Medio):
             except yaml.YAMLError as exc:
                 print(exc)
 
-        config_diario = config[self.etiqueta]
+        # config_diario = config[self.etiqueta]
+        config_diario = config['diarios'][self.etiqueta]
         for feed in config_diario["feeds"]:
             self.feeds[feed["tag"]] = feed["url"]         
 

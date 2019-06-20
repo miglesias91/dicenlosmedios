@@ -1,3 +1,5 @@
+import json
+
 from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce
 from ia import txt
 
@@ -9,16 +11,21 @@ p12 = PaginaDoce()
 
 # clarin.leer()
 # lanacion.leer()
-infobae.leer()
+# infobae.leer()
 # p12.leer()
 # eldestape.leer()
+# textos = []
+# textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['politica']]
+# textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['economia']]
+# textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['internacional']]
+# textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['sociedad']]
+
+# json_data = { 'textos' : [texto for texto in textos]}
+
 textos = []
-textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['politica']]
-textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['economia']]
-textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['internacional']]
-textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['sociedad']]
-
-
+with open('textos.json', 'r', encoding='utf-8') as jsonfile:
+    json_textos = json.load(jsonfile)
+    textos = [jtexto for jtexto in json_textos['textos']]
 
 # freqs = txt.freq(textos)
 # top_10 = freqs.most_common(10)
