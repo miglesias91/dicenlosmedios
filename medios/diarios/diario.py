@@ -16,16 +16,17 @@ class Diario(Medio):
         self.configurar(self.etiqueta)
 
     def configurar(self, etiqueta):
-        with open("medios/diarios/config.yaml", 'r') as stream:
+        with open('medios/diarios/config.yaml', 'r') as stream:
             try:
                 config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
 
-        # config_diario = config[self.etiqueta]
-        config_diario = config['diarios'][self.etiqueta]
-        for feed in config_diario["feeds"]:
-            self.feeds[feed["tag"]] = feed["url"]         
+        for diario in config['diarios']:
+            if diario['tag'] != self.etiqueta:
+                continue
+            for feed in diario['feeds']:
+                self.feeds[feed['tag']] = feed['url']
 
     def leer(self):
         for tag, url_feed in self.feeds.items():

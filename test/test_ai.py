@@ -7,6 +7,7 @@ import nltk
 from nltk.corpus import cess_esp
 
 from ia.txt import freq, word2vec, word2vec_pro
+from bd.entidades import Fecha
 
 class TestFreq(unittest.TestCase):
 
@@ -36,6 +37,14 @@ class TestFreq(unittest.TestCase):
         modelo = word2vec_pro(textos)
         print(modelo.wv.most_similar('alicia', topn=5))
         print(modelo.wv.most_similar('gato', topn=5))
+
+    def test_iniciar_fecha(self):
+        fecha = Fecha("20190621")
+        fecha.diarios
+
+    def test_sumar_noticias_a_fecha(self):
+        fecha = Fecha("20190621")
+        fecha.agregar("infobae", "internacional", )
 
     def test_stopwords(self):
         locales_stopwords = codecs.open("stopwords.txt", 'r', encoding="utf-8").read().split("\r\n")

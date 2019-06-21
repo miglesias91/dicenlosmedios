@@ -2,30 +2,45 @@ import json
 
 from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce
 from ia import txt
+from bd.entidades import Fecha
 
-clarin = Clarin()
-lanacion = LaNacion()
-infobae = Infobae()
-eldestape = ElDestape()
-p12 = PaginaDoce()
 
-# clarin.leer()
-# lanacion.leer()
-# infobae.leer()
-# p12.leer()
-# eldestape.leer()
-# textos = []
-# textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['politica']]
-# textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['economia']]
-# textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['internacional']]
-# textos += [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in infobae.categorias['sociedad']]
+def actualizar_noticias():
 
-# json_data = { 'textos' : [texto for texto in textos]}
+    hoy = Fecha("20190621")
+    hoy.recuperar()
 
-textos = []
-with open('textos.json', 'r', encoding='utf-8') as jsonfile:
-    json_textos = json.load(jsonfile)
-    textos = [jtexto for jtexto in json_textos['textos']]
+    # infobae.com
+    infobae = Infobae()
+    infobae.leer()
+    hoy.agregar(infobae)
+
+    # clarin.com
+    clarin = Clarin()
+    clarin.leer()
+    hoy.agregar(clarin)
+
+    # lanacion.com
+    lanacion = LaNacion()
+    lanacion.leer()
+    hoy.agregar(lanacion)
+
+    # eldestapeweb.com
+    eldestape = ElDestape()
+    eldestape.leer()
+    hoy.agregar(eldestape)
+
+    # pagina12.com
+    p12 = PaginaDoce()
+    p12.leer()
+    hoy.agregar(p12)
+
+    hoy.guardar()
+
+def subir_a_dicenlosmedios():
+    pass
+
+actualizar_noticias()
 
 # freqs = txt.freq(textos)
 # top_10 = freqs.most_common(10)
