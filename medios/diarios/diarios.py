@@ -13,18 +13,6 @@ class Clarin(Diario):
     def __init__(self):
         Diario.__init__(self, "clarin")
 
-    # def reconocer_urls_noticias(self, url_feed):
-    #     urls = []
-    #     for entrada in fp.parse(url_feed).entries:
-    #         urls.append(entrada.link)
-    #     return urls
-
-    # def nueva_noticia(self, url):
-    #     articulo = np.Article(url=url, language='es')
-    #     articulo.download()
-    #     articulo.parse()
-    #     return Noticia(articulo.title, articulo.text, articulo.publish_date, url)
-
 class LaNacion(Diario):
 
     def __init__(self):
@@ -32,18 +20,6 @@ class LaNacion(Diario):
 
     def parsear_fecha(self, entrada):
         return dateutil.parser.parse(entrada.updated)
-
-    # def reconocer_urls_noticias(self, url_feed):
-    #     urls = []
-    #     for entrada in fp.parse(url_feed).entries:
-    #         urls.append(entrada.link)
-    #     return urls
-
-    # def nueva_noticia(self, url):
-    #     articulo = np.Article(url=url, language='es')
-    #     articulo.download()
-    #     articulo.parse()
-    #     return Noticia(articulo.title, articulo.text, articulo.publish_date, url)
 
 class Infobae(Diario):
 
@@ -57,7 +33,7 @@ class Infobae(Diario):
             for entrada in fp.parse(url_feed).entries:
                 titulo = entrada.title
                 texto = re.sub(tag_regexp,'',entrada.content[0].value)
-                fecha = dateutil.parser.parse(entrada.published)
+                fecha = dateutil.parser.parse(entrada.published)  - datetime.timedelta(hours=3)
                 url = entrada.link
                 self.categorias[tag].append(Noticia(titulo, texto, fecha, url))
 
@@ -71,17 +47,6 @@ class PaginaDoce(Diario):
     
     def parsear_fecha(self, entrada):
         return datetime.datetime.today()
-    # def reconocer_urls_noticias(self, url_feed):
-    #     urls = []
-    #     for entrada in fp.parse(url_feed).entries:
-    #         urls.append(entrada.link)
-    #     return urls
-
-    # def nueva_noticia(self, url):
-    #     articulo = np.Article(url=url, language='es')
-    #     articulo.download()
-    #     articulo.parse()
-    #     return Noticia(articulo.title, articulo.text, articulo.publish_date, url)
 
 class ElDestape(Diario):
 
@@ -93,10 +58,6 @@ class ElDestape(Diario):
         feed = bs(urllib.request.urlopen(url_feed).read(), 'html.parser')
         for elemento_url in feed.find_all('url'):
             url = elemento_url.loc.string
-            fecha = dateutil.parser.parse(elemento_url.find('news:publication_date').string)
+            fecha = dateutil.parser.parse(elemento_url.find('news:publication_date').string) - datetime.timedelta(hours=3)
             urls_y_fechas.append((url, fecha))
         return urls_y_fechas
-    #     articulo = np.Article(url=url, language='es')
-    #     articulo.download()
-    #     articulo.parse()
-    #     return Noticia(articulo.title, articulo.text, articulo.publish_date, url)

@@ -1,3 +1,5 @@
+from joblib import Parallel
+
 import string
 import codecs
 import multiprocessing
@@ -11,6 +13,64 @@ import spacy
 import gensim
 from gensim.models.phrases import Phraser, Phrases
 from gensim.models import Word2Vec
+
+class NLP:
+
+    def __init__(self):
+        self.nlp = spacy.load('es_core_news_md', disable=['ner'])
+
+    def top(self, textos, n=10):
+        oraciones = self.__bolsa_de_oraciones_y_palabras__(textos)
+
+        frases = Phrases(oraciones, min_count=30, progress_per=10000)
+        bigram = Phraser(frases)
+
+        oraciones_con_bigramas = bigram[oraciones]
+
+        word_freq = defaultdict(int)
+        for sent in oraciones_con_bigramas:
+            for i in sent:
+                word_freq[i] += 1
+
+        return [(k, word_freq[k]) for k in sorted(word_freq, key=word_freq.get, reverse=True)[:n]]
+
+    def __bolsa_de_oraciones_y_palabras__(self, textos):
+        oraciones = []
+
+        for doc in self.nlp.pipe(textos, n_threads=16, batch_size=10000):
+            for oracion in doc.sents:
+                palabras = [palabra.lemma_ for palabra in oracion if not palabra.is_stop]
+
+                palabras_ok = self.__limpiar__(palabras)
+
+                oraciones.append(palabras_ok)
+
+        return oraciones
+
+    def __limpiar__(self, palabras):
+
+        # saco numeros
+        palabras = [palabra for palabra in palabras if not palabra.isnumeric()]
+
+        # todo a minuscula
+        palabras = [palabra.lower() for palabra in palabras]
+
+        # saco signos de puntuacion
+        signos = string.punctuation + "¡¿\n"
+        palabras = [palabra.translate(str.maketrans('áéíóúý', 'aeiouy', signos)) for palabra in palabras]
+
+        # saco stopwords
+        locales_stopwords = codecs.open("stopwords.txt", 'r', encoding="utf-8").read().split("\r\n")
+
+        palabras = [palabra for palabra in palabras if palabra not in locales_stopwords]
+
+        # saco palabras de una sola letra y saco los espacios en blacno
+        palabras = [palabra.strip() for palabra in palabras if len(palabra) > 1]
+
+        # saco lugares vacios
+        palabras = [palabra for palabra in palabras if palabra]
+
+        return palabras
 
 def freq(textos):
     frecuencias = nltk.FreqDist()
@@ -58,6 +118,8 @@ def word2vec_pro(textos):
     for sent in oraciones_con_bigramas:
         for i in sent:
             word_freq[i] += 1
+
+    return word_freq
 
     cores = multiprocessing.cpu_count() # Count the number of cores in a computer
     w2v_model = Word2Vec(min_count=20,
