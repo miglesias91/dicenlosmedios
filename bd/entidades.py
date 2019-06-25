@@ -6,7 +6,7 @@ import yaml
 import pymongo
 from pymongo import MongoClient
 
-class Fecha:
+class Kiosco:
     def __init__(self, fecha=None):
         self.fecha = ""
         self.fecha = fecha
@@ -17,7 +17,6 @@ class Fecha:
                 config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
-
 
         for diario in config["diarios"]:
             nombre_diario = diario['tag']
@@ -69,3 +68,10 @@ class Fecha:
         
         self.diarios = fecha['diarios']
         return True
+
+    def noticias(self, diario):
+        noticias = []
+        for categoria, urls_y_noticias in self.diarios[diario].items():
+            noticias.extend(urls_y_noticias['noticias'])
+
+        return noticias
