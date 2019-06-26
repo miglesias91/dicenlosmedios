@@ -1,3 +1,5 @@
+import os
+
 from joblib import Parallel
 
 import string
@@ -9,15 +11,26 @@ import nltk
 from nltk.corpus import stopwords
 
 import spacy
+from spacy import tokens
+from spacy.lang.es import Spanish
 
 import gensim
 from gensim.models.phrases import Phraser, Phrases
 from gensim.models import Word2Vec
 
+def crear_nlp(path):
+        path.mkdir(parents=True)
+        nlp = spacy.load('es_core_news_md')
+        nlp.to_disk(path)
+
 class NLP:
 
-    def __init__(self):
-        self.nlp = spacy.load('es_core_news_md', disable=['ner'])
+    def __init__(self, path=None):
+        if path:
+            self.nlp = Spanish().from_disk(path)
+            self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
+        else:
+            self.nlp = spacy.load('es_core_news_md')
 
     def top(self, textos, n=10):
         oraciones = self.__bolsa_de_oraciones_y_palabras__(textos)
@@ -39,7 +52,7 @@ class NLP:
 
         for doc in self.nlp.pipe(textos, n_threads=16, batch_size=10000):
             for oracion in doc.sents:
-                palabras = [palabra.lemma_ for palabra in oracion if not palabra.is_stop]
+                palabras = [palabra.lemma_ for palabra in oracion if not palabra.is_stop  and not (palabra.pos_ == 'VERB')]
 
                 palabras_ok = self.__limpiar__(palabras)
 

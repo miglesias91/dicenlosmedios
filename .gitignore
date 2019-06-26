@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# varios
+twitter.keys
+modelos/
+*.png

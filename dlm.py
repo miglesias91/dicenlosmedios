@@ -1,15 +1,27 @@
+# import spacy
+# from spacy.lang.es.examples import sentences 
+
+# nlp = spacy.load('es_core_news_md')
+# doc = nlp(sentences[0])
+# print(doc.text)
+# for token in doc:
+#     print(token.text, token.pos_, token.dep_)
+
+
+
 import time
 import json
 import datetime
 from collections import defaultdict
 import yaml
+import pathlib
 
 import tweepy
 from wordcloud import WordCloud as wc
 
 from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce
 from ia import txt
-from ia.txt import NLP
+from ia.txt import NLP, freq
 from bd.entidades import Kiosco
 
 def leer_diarios():
@@ -47,16 +59,6 @@ def leer_diarios():
     hoy.guardar()
 
 def subir_a_dicenlosmedios(string_fecha):
-    # claves = open("twitter.keys", "r")
-    # json_claves = json.load(claves)
-
-    # consumer_key = json_claves['consumer_key']
-    # consumer_secret = json_claves['consumer_secret']
-    # access_token = json_claves['access_token']
-    # access_token_secret = json_claves['access_token_secret']
-    # auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    # auth.set_access_token(access_token, access_token_secret)
-    # api = tweepy.API(auth)
 
     kiosco = Kiosco(string_fecha)
     kiosco.recuperar()
@@ -67,16 +69,20 @@ def subir_a_dicenlosmedios(string_fecha):
         except yaml.YAMLError as exc:
             print(exc)
 
+    path = pathlib.Path().cwd() / "modelos/es"
+    nlp = NLP(path)
     for diario in config['diarios']:
-        diario = diario['tag']
+        tag = diario['tag']
         twitter = diario['twitter']
     
-        textos = [noticia.titulo + " " + noticia.titulo + " " + noticia.texto for noticia in kiosco.noticias(diario=diario)]
+        textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['titulo'] for noticia in kiosco.noticias(diario=tag)]
+
+        if len(textos) == 0:
+            continue
 
         fecha = datetime.datetime.strptime(string_fecha, "%Y%m%d")
         texto = "Top 10 palabras más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
 
-        nlp = NLP()
         top_100 = nlp.top(textos, 100)
 
         i = 0
@@ -95,24 +101,27 @@ def subir_a_dicenlosmedios(string_fecha):
             else:
                 break
 
-        wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(frecuencias)
-        wordcloud.recolor(100)
-        path_imagen = diario + ".png"
-        wordcloud.to_file(path_imagen)
+        claves = open("twitter.keys", "r")
+        json_claves = json.load(claves)
 
-        # api.update_with_media(filename=path_imagen, status=texto)
+        consumer_key = json_claves['consumer_key']
+        consumer_secret = json_claves['consumer_secret']
+        access_token = json_claves['access_token']
+        access_token_secret = json_claves['access_token_secret']
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(access_token, access_token_secret)
+        api = tweepy.API(auth)
+
+        dic_top_100 = dict(top_100)
+        wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
+        wordcloud.recolor(100)
+        path_imagen = "infobae" + ".png"
+        wordcloud.to_file(path_imagen)
+        api.update_with_media(filename=path_imagen, status=texto)
 
 # leer_diarios()
 
-# freqs = txt.freq(textos)
-# top_10 = freqs.most_common(10)
-# print(top_10)
-
-# freqs_bg = txt.freq_bigramas(textos)
-# top_10_bg = freqs_bg.most_common(10)
-# print(top_10_bg)
-
-subir_a_dicenlosmedios(string_fecha="20190621")
+# subir_a_dicenlosmedios(string_fecha="20190621")
 
 start = time.process_time()
 textos = []
@@ -120,11 +129,32 @@ with open('textos.json', 'r', encoding='utf-8') as jsonfile:
     json_textos = json.load(jsonfile)
     textos = [jtexto for jtexto in json_textos['textos']]
 
-nlp = NLP()
-top_10 = nlp.top(textos)
+
+path = pathlib.Path().cwd() / "modelos/es"
+# txt.crear_nlp(path=path)
+
+nlp = NLP(path)
+top_100 = nlp.top(textos, n=100)
 
 print(time.process_time() - start)
-print("", top_10)
+print("", top_100)
+
+claves = open("twitter.keys", "r")
+json_claves = json.load(claves)
+
+consumer_key = json_claves['consumer_key']
+consumer_secret = json_claves['consumer_secret']
+access_token = json_claves['access_token']
+access_token_secret = json_claves['access_token_secret']
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+api = tweepy.API(auth)
+
+dic_top_100 = dict(top_100)
+wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
+wordcloud.recolor(100)
+path_imagen = "infobae" + ".png"
+wordcloud.to_file(path_imagen)
 
 start = time.process_time()
 word_freq = defaultdict(int)
