@@ -12,7 +12,7 @@ from nltk.corpus import stopwords
 
 import spacy
 from spacy import tokens
-from spacy.lang.es import Spanish
+# from spacy.lang.es import Spanish
 
 import gensim
 from gensim.models.phrases import Phraser, Phrases
@@ -26,11 +26,16 @@ def crear_nlp(path):
 class NLP:
 
     def __init__(self, path=None):
-        if path:
-            self.nlp = Spanish().from_disk(path)
-            self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
-        else:
-            self.nlp = spacy.load('es_core_news_md')
+        # if path:
+        #     self.nlp = Spanish().from_disk(path)
+        #     self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
+        #     self.nlp.add_pipe(self.nlp.create_pipe('ner'))
+        #     self.nlp.add_pipe(self.nlp.create_pipe('parser'))
+        #     self.nlp.add_pipe(self.nlp.create_pipe('tagger'))
+        # else:
+        self.nlp = spacy.load('es_core_news_md')
+        self.verbos_lista = codecs.open("verbos.txt", 'r', encoding="utf-8").read().split("\r\n")
+        self.sustantivos_lista = codecs.open("sustantivos.txt", 'r', encoding="utf-8").read().split("\r\n")
 
     def top(self, textos, n=10):
         oraciones = self.__bolsa_de_oraciones_y_palabras__(textos)
@@ -52,18 +57,37 @@ class NLP:
 
         for doc in self.nlp.pipe(textos, n_threads=16, batch_size=10000):
             for oracion in doc.sents:
-                palabras = [palabra.lemma_ for palabra in oracion if not palabra.is_stop  and not (palabra.pos_ == 'VERB')]
-
-                palabras_ok = self.__limpiar__(palabras)
+                palabras_ok = [palabra.lemma_ for palabra in oracion if self.__es_relevante__(palabra=palabra)]
 
                 oraciones.append(palabras_ok)
 
         return oraciones
 
+    def __es_relevante__(self, palabra):
+        if palabra.is_stop:
+            return False
+
+        if (palabra.pos_ != "NOUN") and (palabra.pos_ != "PROPN"):
+            return False
+
+        if palabra.lemma_.lower() in self.verbos_lista:
+            return False
+
+        if palabra.lemma_.lower() in self.sustantivos_lista:
+            return False
+
+        if palabra.is_digit:
+            return False
+
+        if len(palabra.text) <= 1:
+            return False
+
+        return True
+
     def __limpiar__(self, palabras):
 
         # saco numeros
-        palabras = [palabra for palabra in palabras if not palabra.isnumeric()]
+        palabras = [palabra for palabra in palabras if not palabra.is_digit]
 
         # todo a minuscula
         palabras = [palabra.lower() for palabra in palabras]
