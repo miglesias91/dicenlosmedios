@@ -12,6 +12,7 @@ class Diario(Medio):
         Medio.__init__(self, etiqueta)
         self.periodistas = {}
         self.categorias = {}
+        self.noticias = []
         self.feeds = {}
         self.configurar(self.etiqueta)
 
@@ -28,14 +29,25 @@ class Diario(Medio):
             for feed in diario['feeds']:
                 self.feeds[feed['tag']] = feed['url']
 
+    # def noticias(self):
+    #     noticias = []
+    #     for categoria, urls_y_noticias in self.categorias.items():
+    #         noticias.extend(urls_y_noticias['noticias'])
+
+    #     return noticias
+
+
     def leer(self):
         for tag, url_feed in self.feeds.items():
             self.categorias[tag] = []
             for url_noticia, fecha in self.reconocer_urls_y_fechas_noticias(url_feed=url_feed):
-                noticia = self.nueva_noticia(url=url_noticia)
-                if(noticia.fecha == None):
+                noticia = self.nueva_noticia(url=url_noticia, categoria=tag, diario=self.etiqueta)
+                if noticia == None:
+                    continue
+                if noticia.fecha == None:
                     noticia.fecha = fecha
-                self.categorias[tag].append(noticia)
+                    
+                self.noticias.append(noticia)
 
     def reconocer_urls_y_fechas_noticias(self, url_feed):
         urls_y_fechas = []
@@ -44,11 +56,15 @@ class Diario(Medio):
             urls_y_fechas.append((entrada.link, fecha))
         return urls_y_fechas
 
-    def nueva_noticia(self, url):
+    def nueva_noticia(self, url, categoria, diario):
         articulo = np.Article(url=url, language='es')
-        articulo.download()
-        articulo.parse()
-        return Noticia(articulo.title, articulo.text, articulo.publish_date, url)
+        try:
+            articulo.download()
+            articulo.parse()
+        except:
+            return None
+
+        return Noticia(fecha=articulo.publish_date, url=url, diario=diario, categoria=categoria, titulo=articulo.title, texto=articulo.text)
 
     def parsear_fecha(self, entrada):
         return dateutil.parser.parse(entrada.published)

@@ -16,40 +16,34 @@ from bd.entidades import Kiosco
 
 def leer_diarios():
 
-    string_fecha_de_hoy = datetime.date.today().strftime("%Y%m%d")
+    # string_fecha_de_hoy = datetime.date.today().strftime("%Y%m%d")
 
-    hoy = Kiosco(string_fecha_de_hoy)
-    hoy.recuperar()
+    kiosco = Kiosco()
 
     # infobae.com
     infobae = Infobae()
     infobae.leer()
-    hoy.agregar(infobae)
-    hoy.guardar()
+    kiosco.actualizar_diario(infobae)
 
     # clarin.com
     clarin = Clarin()
     clarin.leer()
-    hoy.agregar(clarin)
-    hoy.guardar()
+    kiosco.actualizar_diario(clarin)
 
     # lanacion.com
     lanacion = LaNacion()
     lanacion.leer()
-    hoy.agregar(lanacion)
-    hoy.guardar()
+    kiosco.actualizar_diario(lanacion)
 
     # eldestapeweb.com
     eldestape = ElDestape()
     eldestape.leer()
-    hoy.agregar(eldestape)
-    hoy.guardar()
+    kiosco.guardar_noticias(eldestape)
 
     # pagina12.com
     p12 = PaginaDoce()
     p12.leer()
-    hoy.agregar(p12)
-    hoy.guardar()
+    kiosco.guardar_noticias(p12)
 
 def subir_a_dicenlosmedios(string_fecha):
 
@@ -111,7 +105,7 @@ def subir_a_dicenlosmedios(string_fecha):
         wordcloud.to_file(path_imagen)
         api.update_with_media(filename=path_imagen, status=texto)
 
-# leer_diarios()
+leer_diarios()
 
 # subir_a_dicenlosmedios(string_fecha="20190621")
 

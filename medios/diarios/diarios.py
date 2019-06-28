@@ -35,7 +35,8 @@ class Infobae(Diario):
                 texto = re.sub(tag_regexp,'',entrada.content[0].value)
                 fecha = dateutil.parser.parse(entrada.published)  - datetime.timedelta(hours=3)
                 url = entrada.link
-                self.categorias[tag].append(Noticia(titulo, texto, fecha, url))
+                # self.categorias[tag].append(Noticia(titulo, texto, fecha, url))
+                self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=texto))
 
     def nueva_noticia(self, titulo, descripcion, texto, palabras_claves, imagen_url):
         pass
