@@ -6,6 +6,8 @@ import newspaper as np
 from medios.medio import Medio
 from medios.diarios.noticia import Noticia
 
+from bd.entidades import Kiosco
+
 class Diario(Medio):
 
     def __init__(self, etiqueta):
@@ -38,9 +40,14 @@ class Diario(Medio):
 
 
     def leer(self):
+        kiosco = Kiosco()
+        urls_existentes = kiosco.noticias(fecha=None, diario='infobae', categoria=None, fecha_in=False, url_in=True, diario_in=False, cat_in=False, tit_in=False, text_in=False)
+
         for tag, url_feed in self.feeds.items():
             self.categorias[tag] = []
             for url_noticia, fecha in self.reconocer_urls_y_fechas_noticias(url_feed=url_feed):
+                if url_noticia in urls_existentes:
+                    continue
                 noticia = self.nueva_noticia(url=url_noticia, categoria=tag, diario=self.etiqueta)
                 if noticia == None:
                     continue

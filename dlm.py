@@ -22,7 +22,7 @@ def leer_diarios():
 
     # infobae.com
     infobae = Infobae()
-    infobae.leer()
+    infobae.leer() # VER DE QUE LE PASEMOS LOS URLS A EVITAR DESCARGAR
     kiosco.actualizar_diario(infobae)
 
     # clarin.com
@@ -38,17 +38,17 @@ def leer_diarios():
     # eldestapeweb.com
     eldestape = ElDestape()
     eldestape.leer()
-    kiosco.guardar_noticias(eldestape)
+    kiosco.actualizar_diario(eldestape)
 
     # pagina12.com
     p12 = PaginaDoce()
     p12.leer()
-    kiosco.guardar_noticias(p12)
+    kiosco.actualizar_diario(p12)
 
 def subir_a_dicenlosmedios(string_fecha):
 
-    kiosco = Kiosco(string_fecha)
-    kiosco.recuperar()
+    kiosco = Kiosco()
+    fecha = datetime.datetime.strptime(string_fecha, "%Y%m%d")
 
     with open('medios/diarios/config.yaml', 'r') as stream:
         try:
@@ -61,12 +61,11 @@ def subir_a_dicenlosmedios(string_fecha):
         tag = diario['tag']
         twitter = diario['twitter']
     
-        textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['titulo'] for noticia in kiosco.noticias(diario=tag)]
+        textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
 
         if len(textos) == 0:
             continue
 
-        fecha = datetime.datetime.strptime(string_fecha, "%Y%m%d")
         texto = "Top 10 palabras más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
 
         top_100 = nlp.top(textos, n=100)

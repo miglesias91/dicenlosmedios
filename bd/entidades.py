@@ -29,19 +29,42 @@ class Kiosco:
     def actualizar_diario(self, diario):
         urls = self.bd.noticias.find(filter={'diario':diario.etiqueta}, projection=['url'])
         json_noticias = [{'fecha':n.fecha, 'url':n.url, 'diario':n.diario, 'cat':n.categoria,'titulo':n.titulo, 'texto':n.texto} for n in diario.noticias if n.url not in urls]
+
+        if len(json_noticias) == 0:
+            return 0
+
         return self.bd.noticias.insert_many(json_noticias)
+
+    def noticias(self, fecha=None, diario=None, categoria=None, fecha_in=True, url_in=True, diario_in=True, cat_in=True, tit_in=True, text_in=True):
+        query = {}
+
+        if fecha:
+            query['fecha']=fecha
+
+        if diario:
+            query['diario']=diario
+
+        if categoria:
+            query['cat']=categoria
+
+        projection = {'fecha':fecha_in, 'url':url_in, 'diario':diario_in, 'cat':cat_in, 'titulo':tit_in, 'texto':text_in }
+
+        return self.bd.find(query, projection)
 
     def guardar_noticias(self, noticias):
         json_noticias = [{'fecha':n.fecha, 'url':n.url, 'diario':n.diario, 'cat':n.categoria,'titulo':n.titulo, 'texto':n.texto} for n in noticias]
         
-        # cliente = MongoClient()
-        # bd = cliente.dlm
+        if len(json_noticias) == 0:
+            return 0
 
         return self.bd.noticias.insert_many(json_noticias)
 
     def agregar(self, diario):
 
         json_noticias = [{'fecha':n.fecha.strftime("%Y%m%d"), 'url':n.url, 'diario':n.diario, 'cat':n.categoria,'titulo':n.titulo, 'texto':n.texto} for n in diario.noticias]
+        
+        if len(json_noticias) == 0:
+            return 0
         
         cliente = MongoClient()
         bd = cliente.dlm
@@ -65,36 +88,3 @@ class Kiosco:
         self.diarios[diario][categoria]['urls'].extend(urls)
 
         return len(urls)
-
-    def guardar(self):
-
-        cliente = MongoClient()
-
-        bd = cliente.dlm
-
-        # if bd.fechas.find({"fecha":self.fecha}).count() > 0:
-        #     return False
-
-
-        return bd.noticias.insert_many({ "fecha" : self.fecha, "diarios" : self.diarios})
-        # return bd.fechas.insert_one({ "fecha" : self.fecha, "diarios" : self.diarios})
-
-    def recuperar(self):
-        cliente = MongoClient()
-
-        bd = cliente.dlm
-
-        fecha = bd.fechas.find_one({"fecha" : self.fecha })
-
-        if fecha == None:
-            return False
-
-        self.diarios = fecha['diarios']
-        return True
-
-    def noticias(self, diario):
-        noticias = []
-        for categoria, urls_y_noticias in self.diarios[diario].items():
-            noticias.extend(urls_y_noticias['noticias'])
-
-        return noticias
