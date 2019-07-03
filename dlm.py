@@ -22,12 +22,12 @@ def leer_diarios():
 
     # infobae.com
     infobae = Infobae()
-    infobae.leer() # VER DE QUE LE PASEMOS LOS URLS A EVITAR DESCARGAR
+    infobae.leer()
     kiosco.actualizar_diario(infobae)
 
     # clarin.com
     clarin = Clarin()
-    clarin.leer()
+    clarin.leer() # PROBAR QUE SI NO DESCARGA DOS VECES LA MISMA NOTICIA (fix agregado en diario.py::48)
     kiosco.actualizar_diario(clarin)
 
     # lanacion.com
