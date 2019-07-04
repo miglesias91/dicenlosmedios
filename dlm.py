@@ -104,7 +104,7 @@ def subir_a_dicenlosmedios(string_fecha):
         wordcloud.to_file(path_imagen)
         api.update_with_media(filename=path_imagen, status=texto)
 
-leer_diarios()
+# leer_diarios()
 
 # subir_a_dicenlosmedios(string_fecha="20190621")
 
