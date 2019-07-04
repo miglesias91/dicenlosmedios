@@ -42,6 +42,9 @@ class Diario(Medio):
     def leer(self):
         kiosco = Kiosco()
 
+        print("leyendo '" + self.etiqueta + "'...")
+
+
         for tag, url_feed in self.feeds.items():
             self.categorias[tag] = []
             for url_noticia, fecha in self.reconocer_urls_y_fechas_noticias(url_feed=url_feed):

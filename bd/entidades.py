@@ -31,7 +31,10 @@ class Kiosco:
         json_noticias = [{'fecha':n.fecha, 'url':n.url, 'diario':n.diario, 'cat':n.categoria,'titulo':n.titulo, 'texto':n.texto} for n in diario.noticias if n.url not in urls]
 
         if len(json_noticias) == 0:
+            print("no hay noticias nuevas de '" + diario.etiqueta + "'")
             return 0
+
+        print("agregando " + str(len(json_noticias)) + " noticias nuevas de '" + diario.etiqueta + "'...")
 
         return self.bd.noticias.insert_many(json_noticias)
 

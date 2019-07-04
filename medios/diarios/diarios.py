@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup as bs
 from medios.diarios.diario import Diario
 from medios.diarios.noticia import Noticia
 
+from bd.entidades import Kiosco
+
 class Clarin(Diario):
 
     def __init__(self):
@@ -27,6 +29,7 @@ class Infobae(Diario):
         Diario.__init__(self, "infobae")
 
     def leer(self):
+        kiosco = Kiosco()
         tag_regexp = re.compile(r'<[^>]+>')
         for tag, url_feed in self.feeds.items():
             self.categorias[tag] = []
@@ -35,6 +38,8 @@ class Infobae(Diario):
                 texto = re.sub(tag_regexp,'',entrada.content[0].value)
                 fecha = dateutil.parser.parse(entrada.published)  - datetime.timedelta(hours=3)
                 url = entrada.link
+                if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url}).count() > 0: # si existe ya la noticia (url), no la decargo
+                    continue
                 # self.categorias[tag].append(Noticia(titulo, texto, fecha, url))
                 self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=texto))
 
