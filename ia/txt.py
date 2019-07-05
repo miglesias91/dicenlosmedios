@@ -12,7 +12,6 @@ from nltk.corpus import stopwords
 
 import spacy
 from spacy import tokens
-# from spacy.lang.es import Spanish
 
 import gensim
 from gensim.models.phrases import Phraser, Phrases
@@ -26,13 +25,6 @@ def crear_nlp(path):
 class NLP:
 
     def __init__(self, path=None):
-        # if path:
-        #     self.nlp = Spanish().from_disk(path)
-        #     self.nlp.add_pipe(self.nlp.create_pipe('sentencizer'))
-        #     self.nlp.add_pipe(self.nlp.create_pipe('ner'))
-        #     self.nlp.add_pipe(self.nlp.create_pipe('parser'))
-        #     self.nlp.add_pipe(self.nlp.create_pipe('tagger'))
-        # else:
         self.nlp = spacy.load('es_core_news_md')
         self.verbos_lista = codecs.open("verbos.txt", 'r', encoding="utf-8").read().split("\r\n")
         self.sustantivos_lista = codecs.open("sustantivos.txt", 'r', encoding="utf-8").read().split("\r\n")
@@ -52,14 +44,58 @@ class NLP:
 
         return [(k, word_freq[k]) for k in sorted(word_freq, key=word_freq.get, reverse=True)[:n]]
 
+    def top_personas(self, textos, n=10):
+        oraciones = self.__bolsa_de_personas__(textos)
+
+        frases = Phrases(oraciones, min_count=30, progress_per=10000)
+        bigram = Phraser(frases)
+
+        oraciones_con_bigramas = bigram[oraciones]
+
+        personas_freq = defaultdict(int)
+        for sent in oraciones_con_bigramas:
+            for i in sent:
+                personas_freq[i] += 1
+
+        a_borrar=[]
+        for apellido, valor_apellido in personas_freq.items():
+            if len(apellido.split()) == 1:
+                for apellido_y_nombre, valor_a_y_n in personas_freq.items():
+                    if len(apellido_y_nombre.split()) > 1:
+                        if apellido_y_nombre.split()[-1] == apellido:
+                            personas_freq[apellido_y_nombre] += valor_apellido
+                            if a_borrar.count(apellido) == 0:
+                                a_borrar.append(apellido)
+
+        for apellido in a_borrar:
+            del personas_freq[apellido]  
+
+        return [(k, personas_freq[k]) for k in sorted(personas_freq, key=personas_freq.get, reverse=True)[:n]]
+
+    def __bolsa_de_personas__(self, textos):
+        oraciones = []
+
+        for doc in self.nlp.pipe(textos, n_threads=16, batch_size=10000):
+            for oracion in doc.sents:
+                palabras_ok = [entidad.text for entidad in oracion.ents if entidad.label_ == "PER"]
+
+                if len(palabras_ok) == 0:
+                    continue
+
+                oraciones.append(palabras_ok)
+
+        return oraciones
+
     def __bolsa_de_oraciones_y_palabras__(self, textos):
         oraciones = []
 
         for doc in self.nlp.pipe(textos, n_threads=16, batch_size=10000):
             for oracion in doc.sents:
-                # palabras_ok = [palabra.lemma_ for palabra in oracion if self.__es_relevante__(palabra=palabra)]
                 palabras_ok = [palabra.text for palabra in oracion if self.__es_relevante__(palabra=palabra)]
-
+                
+                if len(palabras_ok) == 0:
+                    continue
+                
                 oraciones.append(palabras_ok)
 
         return oraciones

@@ -16,8 +16,6 @@ from bd.entidades import Kiosco
 
 def leer_diarios():
 
-    # string_fecha_de_hoy = datetime.date.today().strftime("%Y%m%d")
-
     kiosco = Kiosco()
 
     # infobae.com
@@ -27,7 +25,7 @@ def leer_diarios():
 
     # clarin.com
     clarin = Clarin()
-    clarin.leer() # PROBAR QUE SI NO DESCARGA DOS VECES LA MISMA NOTICIA (fix agregado en diario.py::48)
+    clarin.leer()
     kiosco.actualizar_diario(clarin)
 
     # lanacion.com
@@ -45,7 +43,7 @@ def leer_diarios():
     p12.leer()
     kiosco.actualizar_diario(p12)
 
-def subir_a_dicenlosmedios(string_fecha):
+def subir_top_diez(string_fecha):
 
     kiosco = Kiosco()
     fecha = datetime.datetime.strptime(string_fecha, "%Y%m%d")
@@ -108,9 +106,55 @@ def subir_a_dicenlosmedios(string_fecha):
         wordcloud.to_file(path_imagen)
         # api.update_with_media(filename=path_imagen, status=texto)
 
+def subir_top_personas(string_fecha):
+    kiosco = Kiosco()
+    fecha = datetime.datetime.strptime(string_fecha, "%Y%m%d")
+
+    with open('medios/diarios/config.yaml', 'r') as stream:
+        try:
+            config = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    nlp = NLP()
+    for diario in config['diarios']:
+        tag = diario['tag']
+        twitter = diario['twitter']
+    
+        textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+
+        print("tag: " + tag +" textos: " + str(len(textos)))
+
+        if len(textos) == 0:
+            continue
+
+        texto = "Top 10 personas más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
+
+        top_100 = nlp.top_personas(textos, n=100)
+
+        i = 0
+        for nombre, m in top_100:
+            linea = ""
+            i += 1
+            if i >= 10:
+                linea = str(i) + ". #" + nombre + " " + str(m) + "\n"
+                texto += linea
+                break
+            else:
+                linea = str(i) + ".  #" + nombre + " " + str(m) + "\n"
+
+            if len(texto) + len(linea) < 220:
+                texto += linea
+            else:
+                break
+
+        print(texto)
+
 # leer_diarios()
 
-# subir_a_dicenlosmedios(string_fecha="20190704")
+# subir_top_diez(string_fecha="20190704")
+
+subir_top_personas(string_fecha="20190705")
 
 def usage():
     print("dlm (dicen-los-medios) 2019 v1.1")
@@ -134,7 +178,7 @@ def main():
             leer=True
         elif o == "--twittear":
             if a == "top":
-                twittear=subir_a_dicenlosmedios
+                twittear=subir_top_diez
             else:
                 print("análisis '" + a + "' no existe.")
                 break
