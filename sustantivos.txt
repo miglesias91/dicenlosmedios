@@ -18,3 +18,9 @@ madrid
 servicio
 centro
 hora
+twitter
+whatsapp
+facebook
+instagram
+personas
+millones

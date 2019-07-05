@@ -31,19 +31,10 @@ class Diario(Medio):
             for feed in diario['feeds']:
                 self.feeds[feed['tag']] = feed['url']
 
-    # def noticias(self):
-    #     noticias = []
-    #     for categoria, urls_y_noticias in self.categorias.items():
-    #         noticias.extend(urls_y_noticias['noticias'])
-
-    #     return noticias
-
-
     def leer(self):
         kiosco = Kiosco()
 
         print("leyendo '" + self.etiqueta + "'...")
-
 
         for tag, url_feed in self.feeds.items():
             self.categorias[tag] = []
@@ -57,6 +48,9 @@ class Diario(Medio):
                     noticia.fecha = fecha
                     
                 self.noticias.append(noticia)
+
+    def limpiar_texto(self, texto):
+        return texto
 
     def reconocer_urls_y_fechas_noticias(self, url_feed):
         urls_y_fechas = []
@@ -73,7 +67,7 @@ class Diario(Medio):
         except:
             return None
 
-        return Noticia(fecha=articulo.publish_date, url=url, diario=diario, categoria=categoria, titulo=articulo.title, texto=articulo.text)
+        return Noticia(fecha=articulo.publish_date, url=url, diario=diario, categoria=categoria, titulo=articulo.title, texto=self.limpiar_texto(articulo.text))
 
     def parsear_fecha(self, entrada):
         return dateutil.parser.parse(entrada.published)

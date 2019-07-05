@@ -15,10 +15,21 @@ class Clarin(Diario):
     def __init__(self):
         Diario.__init__(self, "clarin")
 
+    def limpiar_texto(self, texto):
+        regexp = re.compile(r'[\n\s]Newsletters[^\n]+\n')
+        return re.sub(regexp,'',texto)
+
 class LaNacion(Diario):
 
     def __init__(self):
         Diario.__init__(self, "lanacion")
+
+    def limpiar_texto(self, texto):
+        texto = texto.replace('SEGUIR', '')
+        regexp = re.compile(r'[\n\s]Crédito[^\n]+\n')
+        texto = re.sub(regexp,'',texto)
+        regexp = re.compile(r'[\n\s]Comentar[^\n]+\n')
+        return re.sub(regexp,'',texto)
 
     def parsear_fecha(self, entrada):
         return dateutil.parser.parse(entrada.updated)
@@ -30,6 +41,9 @@ class Infobae(Diario):
 
     def leer(self):
         kiosco = Kiosco()
+
+        print("leyendo '" + self.etiqueta + "'...")
+
         tag_regexp = re.compile(r'<[^>]+>')
         for tag, url_feed in self.feeds.items():
             self.categorias[tag] = []

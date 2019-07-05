@@ -63,6 +63,8 @@ def subir_a_dicenlosmedios(string_fecha):
     
         textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
 
+        print("tag: " + tag +" textos: " + str(len(textos)))
+
         if len(textos) == 0:
             continue
 
@@ -75,16 +77,18 @@ def subir_a_dicenlosmedios(string_fecha):
             linea = ""
             i += 1
             if i >= 10:
-                linea = str(i) + ". #" + nombre + "\n"
+                linea = str(i) + ". #" + nombre + " " + str(m) + "\n"
                 texto += linea
                 break
             else:
-                linea = str(i) + ".  #" + nombre + "\n"
+                linea = str(i) + ".  #" + nombre + " " + str(m) + "\n"
 
             if len(texto) + len(linea) < 220:
                 texto += linea
             else:
                 break
+
+        print(texto)
 
         claves = open("twitter.keys", "r")
         json_claves = json.load(claves)
@@ -100,45 +104,25 @@ def subir_a_dicenlosmedios(string_fecha):
         dic_top_100 = dict(top_100)
         wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
         wordcloud.recolor(100)
-        path_imagen = "infobae" + ".png"
+        path_imagen = tag + ".png"
         wordcloud.to_file(path_imagen)
-        api.update_with_media(filename=path_imagen, status=texto)
+        # api.update_with_media(filename=path_imagen, status=texto)
 
 # leer_diarios()
 
-# subir_a_dicenlosmedios(string_fecha="20190621")
-
-# start = time.process_time()
-# textos = []
-# with open('textos.json', 'r', encoding='utf-8') as jsonfile:
-#     json_textos = json.load(jsonfile)
-#     textos = [jtexto for jtexto in json_textos['textos']]
-
-
-# path = pathlib.Path().cwd() / "modelos/es"
-# txt.crear_nlp(path=path)
-
-# nlp = NLP()
-# top_100 = nlp.top(textos, n=100)
-
-# # print(modelo.wv.most_similar(top_10[0][0], topn=5))
-# print(top_10)
-# print(modelo.wv.most_similar(['kirchnerismo'], topn=5))
-# print(modelo.wv.most_similar(['cristina_kirchner'], topn=5))
-# print(modelo.wv.most_similar(['mauricio_macri'], topn=5))
-# print(modelo.wv.most_similar(['policia'], topn=5))
-# print(modelo.wv.most_similar(['dolar'], topn=5))
-# print(modelo.wv.similar_by_word(top_10[0], topn=5))
+# subir_a_dicenlosmedios(string_fecha="20190704")
 
 def usage():
     print("dlm (dicen-los-medios) 2019 v1.1")
+    print("--leer  actualiza las noticias de todos los diarios")
+    print("--twittear=top  twittea el top 10 de todos los diarios")
+    print("--fecha=AAAAMMDD  fecha de las noticias que usa para hacer el top 10")
 
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", ["leer", "twittear=", "fecha="])
     except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err) # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -157,10 +141,7 @@ def main():
         elif o == "--fecha":
             string_fecha=a
         else:
-            assert False, "unhandled option"
-
-    print("fecha: " + string_fecha)
-    print("leer: " + leer.__str__())
+            assert False, "opción desconocida"
 
     if leer:
         leer_diarios()
