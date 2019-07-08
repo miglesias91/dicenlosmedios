@@ -44,8 +44,12 @@ class Kiosco:
         query = {}
 
         if fecha:
-            desde = datetime.datetime(fecha.year, fecha.month, fecha.day, 0,0,0)
-            hasta = datetime.datetime(fecha.year, fecha.month, fecha.day, 23,59,59)
+            if type(fecha) is dict:
+                desde = datetime.datetime(fecha['desde'].year, fecha['desde'].month, fecha['desde'].day, 0,0,0)
+                hasta = datetime.datetime(fecha['hasta'].year, fecha['hasta'].month, fecha['hasta'].day, 23,59,59)                
+            else:
+                desde = datetime.datetime(fecha.year, fecha.month, fecha.day, 0,0,0)
+                hasta = datetime.datetime(fecha.year, fecha.month, fecha.day, 23,59,59)
             query['fecha']={"$gte":desde, "$lte":hasta}
 
         if diario:

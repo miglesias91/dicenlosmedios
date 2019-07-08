@@ -9,7 +9,7 @@ import pathlib
 import tweepy
 from wordcloud import WordCloud as wc
 
-from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce
+from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce, CasaRosada
 from ia import txt
 from ia.txt import NLP, freq
 from bd.entidades import Kiosco
@@ -43,7 +43,12 @@ def leer_diarios():
     p12.leer()
     kiosco.actualizar_diario(p12)
 
-def subir_top_diez(string_fecha):
+    # casarosada.com
+    casarosada = CasaRosada()
+    casarosada.leer()
+    kiosco.actualizar_diario(casarosada)
+
+def top_diez(string_fecha):
 
     kiosco = Kiosco()
     fecha = datetime.datetime.strptime(string_fecha, "%Y%m%d")
@@ -154,38 +159,50 @@ def subir_top_personas(string_fecha):
 
 # subir_top_diez(string_fecha="20190704")
 
-subir_top_personas(string_fecha="20190705")
+# subir_top_personas(string_fecha="20190705")
 
 def usage():
-    print("dlm (dicen-los-medios) 2019 v1.1")
-    print("--leer  actualiza las noticias de todos los diarios")
-    print("--twittear=top  twittea el top 10 de todos los diarios")
-    print("--fecha=AAAAMMDD  fecha de las noticias que usa para hacer el top 10")
+    print("dlm (dicen-los-medios) v1.1")
+    print("ACCIONES")
+    print("--leer [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - actualiza las noticias de todos los diarios, a menos que se especifiquen los MEDIOS en particular")
+    print("--top [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de palabras de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
+    print("--top-personas [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de personas de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
+    print("PARAMETROS")
+    print("--fecha AAAAMMDD - selecciona las noticias con fecha AAAMMDD")
+    print("--fecha AAAAMMDD_desde-AAAAMMDD_hasta - selecciona las noticias dentro del  rango de fechas AAAAMMDD_desde -> AAAAMMDD_hasta ")
+    print("--twittear - indica que el texto y la imagén resultante se suben a @dicenlosmedios")
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "", ["leer", "twittear=", "fecha="])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top=", "top-personas=", "fecha=", "twittear"])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
-    twittear=None
-    string_fecha=""
+    twittear=False
+    fecha=""
+    top_max=0
+    medios=[]
     leer=False
     for o, a in opts:
-        if o == "--leer":
+        if o == "--help" or o == "-h":
+            usage()
+        elif o == "--leer":
+            print("leer true")
             leer=True
-        elif o == "--twittear":
-            if a == "top":
-                twittear=subir_top_diez
-            else:
-                print("análisis '" + a + "' no existe.")
-                break
+        elif o == "--top":
+            print(a)
+        elif o == "--top-personas":
+            print(a)
         elif o == "--fecha":
-            string_fecha=a
+            print(a)
+        elif o == "--twittear":
+            print("twittear true")
+            twittear = True
         else:
             assert False, "opción desconocida"
+    return
 
     if leer:
         leer_diarios()

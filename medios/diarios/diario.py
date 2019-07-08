@@ -12,8 +12,6 @@ class Diario(Medio):
 
     def __init__(self, etiqueta):
         Medio.__init__(self, etiqueta)
-        self.periodistas = {}
-        self.categorias = {}
         self.noticias = []
         self.feeds = {}
         self.configurar(self.etiqueta)
@@ -37,7 +35,6 @@ class Diario(Medio):
         print("leyendo '" + self.etiqueta + "'...")
 
         for tag, url_feed in self.feeds.items():
-            self.categorias[tag] = []
             for url_noticia, fecha in self.reconocer_urls_y_fechas_noticias(url_feed=url_feed):
                 if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url_noticia}).count() > 0: # si existe ya la noticia (url), no la decargo
                     continue

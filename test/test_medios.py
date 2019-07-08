@@ -2,7 +2,7 @@ import unittest
 
 import newspaper as np
 
-from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce
+from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce, CasaRosada
 
 class TestMedios(unittest.TestCase):
 
@@ -23,3 +23,7 @@ class TestMedios(unittest.TestCase):
         diario = LaNacion()
         t = diario.limpiar_texto(articulo.text)
         return 1
+
+    def test_leer_casarosada(self):
+        cr = CasaRosada()
+        cr.leer()

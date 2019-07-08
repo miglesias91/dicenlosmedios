@@ -53,3 +53,9 @@ diarios:
     feeds:
       - tag: "todo"
         url: "https://www.eldestapeweb.com/sitemap-news.xml"
+
+  - tag: "casarosada"
+    twitter: "@CasaRosada"
+    feeds:
+      - tag: "todo"
+        url: "https://www.casarosada.gob.ar/informacion/discursos?format=feed"
