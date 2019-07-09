@@ -4,6 +4,7 @@ import re
 import feedparser as fp
 import urllib.request
 from bs4 import BeautifulSoup as bs
+import newspaper as np
 
 from medios.diarios.diario import Diario
 from medios.diarios.noticia import Noticia
@@ -71,6 +72,20 @@ class ElDestape(Diario):
     def __init__(self):
         Diario.__init__(self, "eldestape")
 
+    def nueva_noticia(self, url, categoria, diario):
+        articulo = np.Article(url=url, language='es')
+        try:
+            articulo.download()
+            articulo.parse()
+        except:
+            return None
+
+        categoria_parseada = self.reconocer_categoria(articulo.html)
+        if len(categoria_parseada) != 0:
+            categoria = categoria_parseada
+
+        return Noticia(fecha=articulo.publish_date, url=url, diario=diario, categoria=categoria, titulo=articulo.title, texto=self.limpiar_texto(articulo.text))
+
     def reconocer_urls_y_fechas_noticias(self, url_feed):
         urls_y_fechas = []
         feed = bs(urllib.request.urlopen(url_feed).read(), 'html.parser')
@@ -79,6 +94,11 @@ class ElDestape(Diario):
             fecha = dateutil.parser.parse(elemento_url.find('news:publication_date').string) - datetime.timedelta(hours=3)
             urls_y_fechas.append((url, fecha))
         return urls_y_fechas
+
+    def reconocer_categoria(self, raw_html):
+        feed = bs(raw_html, 'html.parser')
+        elemento = feed.find(name='div', attrs={'class':'category-wrapper'})
+        return elemento.next_element.replace('\n', '').strip().lower()
 
 class CasaRosada(Diario):
 
@@ -138,4 +158,3 @@ class CasaRosada(Diario):
                 if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url}).count() > 0: # si existe ya la noticia (url), no la decargo
                     continue
                 self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=texto_limpio))
-        

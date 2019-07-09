@@ -57,18 +57,32 @@ class NLP:
             for i in sent:
                 personas_freq[i] += 1
 
+        personas_freq_limpio = defaultdict(int)
+        for nombre, valor_apellido in personas_freq.items():
+            personas_freq_limpio[nombre.replace('\n', '')] = valor_apellido
+
+        personas_freq = personas_freq_limpio
+
         a_borrar=[]
-        for apellido, valor_apellido in personas_freq.items():
-            if len(apellido.split()) == 1:
+        for nombre, valor_apellido in personas_freq.items():
+            campos_apellido = nombre.split()
+            if len(campos_apellido) == 1:
                 for apellido_y_nombre, valor_a_y_n in personas_freq.items():
                     if len(apellido_y_nombre.split()) > 1:
-                        if apellido_y_nombre.split()[-1] == apellido:
+                        if apellido_y_nombre.split()[-1] == nombre:
                             personas_freq[apellido_y_nombre] += valor_apellido
-                            if a_borrar.count(apellido) == 0:
-                                a_borrar.append(apellido)
+                            if a_borrar.count(nombre) == 0:
+                                a_borrar.append(nombre)
+            if len(campos_apellido) == 2:
+                for apellido_y_nombre, valor_a_y_n in personas_freq.items():
+                    if len(apellido_y_nombre.split()) > 2:
+                        if set(campos_apellido).issubset(apellido_y_nombre.split()):
+                            personas_freq[apellido_y_nombre] += valor_apellido
+                            if a_borrar.count(nombre) == 0:
+                                a_borrar.append(nombre)
 
-        for apellido in a_borrar:
-            del personas_freq[apellido]  
+        for nombre in a_borrar:
+            del personas_freq[nombre]
 
         return [(k, personas_freq[k]) for k in sorted(personas_freq, key=personas_freq.get, reverse=True)[:n]]
 
