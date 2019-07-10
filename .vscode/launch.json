@@ -4,25 +4,43 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Module",
             "type": "python",
             "request": "launch",
-            "module": "dlm"
-        },
+            "module": "dlm",
+       },
         {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
-        }
+        },
         {
-            "name": "dlm",
+            "name": "dlm-leer",
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
-            "console": "integratedTerminal"
-        }        
+            "console": "integratedTerminal",
+            "args":["--leer", "clarin", "lanacion", "infobae", "paginadoce", "eldestape", "casarosada"]
+        },
+        {
+            "name": "dlm-top",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/dlm.py",
+            "console": "integratedTerminal",
+            "args":["--top", "20", "--fecha", "20190101", "clarin", "lanacion", "infobae", "paginadoce", "eldestape", "casarosada"]
+        },
+        {
+            "name": "dlm-top-personas",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/dlm.py",
+            "console": "integratedTerminal",
+            "args":["--top-personas", "20", "--fecha", "20190101-20190201", "clarin", "lanacion", "infobae", "paginadoce", "eldestape", "casarosada"]
+        }
     ]
 }

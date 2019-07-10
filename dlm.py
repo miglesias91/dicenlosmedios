@@ -14,44 +14,54 @@ from ia import txt
 from ia.txt import NLP, freq
 from bd.entidades import Kiosco
 
-def leer_diarios():
+def leer_medios(parametros):
+    medios = set(parametros['medios'])
 
     kiosco = Kiosco()
+
 
     # infobae.com
     infobae = Infobae()
-    infobae.leer()
-    kiosco.actualizar_diario(infobae)
+    if infobae.etiqueta in medios:
+        infobae.leer()
+        kiosco.actualizar_diario(infobae)
 
     # clarin.com
     clarin = Clarin()
-    clarin.leer()
-    kiosco.actualizar_diario(clarin)
+    if clarin.etiqueta in medios:
+        clarin.leer()
+        kiosco.actualizar_diario(clarin)
 
     # lanacion.com
     lanacion = LaNacion()
-    lanacion.leer()
-    kiosco.actualizar_diario(lanacion)
+    if lanacion.etiqueta in medios:
+        lanacion.leer()
+        kiosco.actualizar_diario(lanacion)
 
     # eldestapeweb.com
     eldestape = ElDestape()
-    eldestape.leer()
-    kiosco.actualizar_diario(eldestape)
+    if eldestape.etiqueta in medios:
+        eldestape.leer()
+        kiosco.actualizar_diario(eldestape)
 
     # pagina12.com
     p12 = PaginaDoce()
-    p12.leer()
-    kiosco.actualizar_diario(p12)
+    if p12.etiqueta in medios:
+        p12.leer()
+        kiosco.actualizar_diario(p12)
 
     # casarosada.com
     casarosada = CasaRosada()
-    casarosada.leer()
-    kiosco.actualizar_diario(casarosada)
+    if casarosada.etiqueta in medios:
+        casarosada.leer()
+        kiosco.actualizar_diario(casarosada)
 
-def top_diez(string_fecha):
+def top(parametros):
+    fecha = parametros['fecha']
+    top_max = parametros['top_max']
+    medios = set(parametros['medios'])
 
     kiosco = Kiosco()
-    fecha = datetime.datetime.strptime(string_fecha, "%Y%m%d")
 
     with open('medios/diarios/config.yaml', 'r') as stream:
         try:
@@ -62,6 +72,9 @@ def top_diez(string_fecha):
     nlp = NLP()
     for diario in config['diarios']:
         tag = diario['tag']
+        if tag not in medios and len(medios) > 0:
+            continue
+
         twitter = diario['twitter']
     
         textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
@@ -71,7 +84,7 @@ def top_diez(string_fecha):
         if len(textos) == 0:
             continue
 
-        texto = "Top 10 palabras más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
+        texto = "Top " +  str(top_max) + " palabras más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
 
         top_100 = nlp.top(textos, n=100)
 
@@ -109,11 +122,14 @@ def top_diez(string_fecha):
         wordcloud.recolor(100)
         path_imagen = tag + ".png"
         wordcloud.to_file(path_imagen)
-        # api.update_with_media(filename=path_imagen, status=texto)
+        api.update_with_media(filename=path_imagen, status=texto)
 
-def subir_top_personas(string_fecha):
+def top_personas(parametros):
+    fecha = parametros['fecha']
+    top_max = parametros['top_max']
+    medios = set(parametros['medios'])
+
     kiosco = Kiosco()
-    fecha = datetime.datetime.strptime(string_fecha, "%Y%m%d")
 
     with open('medios/diarios/config.yaml', 'r') as stream:
         try:
@@ -124,6 +140,9 @@ def subir_top_personas(string_fecha):
     nlp = NLP()
     for diario in config['diarios']:
         tag = diario['tag']
+        if tag not in medios and len(medios) > 0:
+            continue
+
         twitter = diario['twitter']
     
         textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
@@ -133,9 +152,9 @@ def subir_top_personas(string_fecha):
         if len(textos) == 0:
             continue
 
-        texto = "Top 10 personas más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
+        texto = "Top " + str(top_max)  + " personas más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
 
-        top_100 = nlp.top_personas(textos, n=100)
+        top_100 = nlp.top_personas(textos, n=top_max)
 
         i = 0
         for nombre, m in top_100:
@@ -167,12 +186,16 @@ def usage():
     print("--leer [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - actualiza las noticias de todos los diarios, a menos que se especifiquen los MEDIOS en particular")
     print("--top [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de palabras de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-personas [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de personas de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
-    print("PARAMETROS")
+    print("PARAMETROS OPCIONALES")
     print("--fecha AAAAMMDD - selecciona las noticias con fecha AAAMMDD")
     print("--fecha AAAAMMDD_desde-AAAAMMDD_hasta - selecciona las noticias dentro del  rango de fechas AAAAMMDD_desde -> AAAAMMDD_hasta ")
     print("--twittear - indica que el texto y la imagén resultante se suben a @dicenlosmedios")
 
 def main():
+    accion = None
+    twittear = False
+    fecha = datetime.datetime.now().date()
+    top_max = 10
     try:
         opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top=", "top-personas=", "fecha=", "twittear"])
     except getopt.GetoptError as err:
@@ -180,36 +203,43 @@ def main():
         usage()
         sys.exit(2)
 
-    twittear=False
-    fecha=""
-    top_max=0
-    medios=[]
-    leer=False
+    medios = args
+
+    parametros = {'medios':medios}
     for o, a in opts:
         if o == "--help" or o == "-h":
             usage()
         elif o == "--leer":
-            print("leer true")
-            leer=True
+            accion=leer_medios
         elif o == "--top":
-            print(a)
+            if a:
+                top_max = a
+            parametros['top_max'] = top_max
+            accion=top
         elif o == "--top-personas":
-            print(a)
+            if a:
+                top_max = a
+            parametros['top_max'] = top_max
+            accion=top_personas
         elif o == "--fecha":
-            print(a)
+            if len(a.split('-')) == 2:
+                desde = datetime.datetime.strptime(a.split('-')[0], "%Y%m%d")
+                desde.replace(hour=0, minute=0, second=0)
+                hasta = datetime.datetime.strptime(a.split('-')[1], "%Y%m%d")
+                hasta.replace(hour=23, minute=59, second=59)
+                fecha = {'desde':desde, 'hasta':hasta}
+            else:
+                fecha = datetime.datetime.strptime(a, "%Y%m%d")
+
+            parametros['fecha'] = fecha
+
         elif o == "--twittear":
-            print("twittear true")
             twittear = True
         else:
             assert False, "opción desconocida"
-    return
-
-    if leer:
-        leer_diarios()
-
-    if string_fecha:
-        datetime.datetime.strptime(string_fecha, "%Y%m%d")
-        twittear(string_fecha)
+    
+    # ejecuto accion con sus parametros
+    accion(parametros)
 
 if __name__ == "__main__":
     main()
