@@ -24,7 +24,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--leer", "clarin", "lanacion", "infobae", "paginadoce", "eldestape", "casarosada"]
+            "args":["--leer"]
         },
         {
             "name": "dlm-top",

@@ -19,40 +19,39 @@ def leer_medios(parametros):
 
     kiosco = Kiosco()
 
-
     # infobae.com
     infobae = Infobae()
-    if infobae.etiqueta in medios:
+    if infobae.etiqueta in medios or len(medios) == 0:
         infobae.leer()
         kiosco.actualizar_diario(infobae)
 
     # clarin.com
     clarin = Clarin()
-    if clarin.etiqueta in medios:
+    if clarin.etiqueta in medios or len(medios) == 0:
         clarin.leer()
         kiosco.actualizar_diario(clarin)
 
     # lanacion.com
     lanacion = LaNacion()
-    if lanacion.etiqueta in medios:
+    if lanacion.etiqueta in medios or len(medios) == 0:
         lanacion.leer()
         kiosco.actualizar_diario(lanacion)
 
     # eldestapeweb.com
     eldestape = ElDestape()
-    if eldestape.etiqueta in medios:
+    if eldestape.etiqueta in medios or len(medios) == 0:
         eldestape.leer()
         kiosco.actualizar_diario(eldestape)
 
     # pagina12.com
     p12 = PaginaDoce()
-    if p12.etiqueta in medios:
+    if p12.etiqueta in medios or len(medios) == 0:
         p12.leer()
         kiosco.actualizar_diario(p12)
 
     # casarosada.com
     casarosada = CasaRosada()
-    if casarosada.etiqueta in medios:
+    if casarosada.etiqueta in medios or len(medios) == 0:
         casarosada.leer()
         kiosco.actualizar_diario(casarosada)
 
@@ -85,7 +84,13 @@ def top(parametros):
         if len(textos) == 0:
             continue
 
-        texto = "Top " +  str(top_max) + " palabras más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
+        string_fecha = ""
+        if type(fecha) is dict:
+            string_fecha = fecha['desde'].strftime("%d.%m.%Y") + " al " + fecha['hasta'].strftime("%d.%m.%Y")
+        else:
+            string_fecha = fecha.strftime("%d.%m.%Y")
+
+        texto = "Top " +  str(top_max) + " palabras más frecuentes en las noticias de " + twitter + " del " + string_fecha + "\n"
 
         top_100 = nlp.top(textos, n=100)
 
@@ -100,10 +105,10 @@ def top(parametros):
             else:
                 linea = str(i) + ".  #" + nombre + " " + str(m) + "\n"
 
-            if len(texto) + len(linea) < 220:
-                texto += linea
-            else:
+            if twittear and len(texto) + len(linea) > 220:
                 break
+            else:
+                texto += linea
 
         print(texto)
 
@@ -155,8 +160,14 @@ def top_personas(parametros):
 
         if len(textos) == 0:
             continue
+        
+        string_fecha = ""
+        if type(fecha) is dict:
+            string_fecha = fecha['desde'].strftime("%d.%m.%Y") + " al " + fecha['hasta'].strftime("%d.%m.%Y")
+        else:
+            string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Top " + str(top_max)  + " personas más frecuentes en las noticias de " + twitter + " del " + fecha.strftime("%d.%m.%Y") + "\n"
+        texto = "Top " + str(top_max)  + " personas más frecuentes en las noticias de " + twitter + " del " + string_fecha + "\n"
 
         top_100 = nlp.top_personas(textos, n=top_max)
 
@@ -171,10 +182,10 @@ def top_personas(parametros):
             else:
                 linea = str(i) + ".  #" + nombre + " " + str(m) + "\n"
 
-            if len(texto) + len(linea) < 220:
-                texto += linea
-            else:
+            if twittear and len(texto) + len(linea) > 220:
                 break
+            else:
+                texto += linea
 
         print(texto)
 

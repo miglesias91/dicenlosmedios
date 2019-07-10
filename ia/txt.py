@@ -105,7 +105,13 @@ class NLP:
 
         for doc in self.nlp.pipe(textos, n_threads=16, batch_size=10000):
             for oracion in doc.sents:
-                palabras_ok = [palabra.text for palabra in oracion if self.__es_relevante__(palabra=palabra)]
+                # saco las palabras que son entidades
+                signos = string.punctuation + "¡¿\n"
+                terminos_entidades = []
+                [terminos_entidades.extend(ent.text.translate(str.maketrans('','', signos)).split()) for ent in oracion.ents]
+
+                set_terminos_entidades = set(terminos_entidades)
+                palabras_ok = [palabra.text for palabra in oracion if self.__es_relevante__(palabra=palabra) and palabra.text not in set_terminos_entidades]
                 
                 if len(palabras_ok) == 0:
                     continue

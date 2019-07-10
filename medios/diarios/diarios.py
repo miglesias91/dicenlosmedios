@@ -18,7 +18,7 @@ class Clarin(Diario):
 
     def limpiar_texto(self, texto):
         regexp = re.compile(r'[\n\s]Newsletters[^\n]+\n')
-        return re.sub(regexp,'',texto)
+        return re.sub(regexp,' ',texto)
 
 class LaNacion(Diario):
 
@@ -28,9 +28,13 @@ class LaNacion(Diario):
     def limpiar_texto(self, texto):
         texto = texto.replace('SEGUIR', '')
         regexp = re.compile(r'[\n\s]Crédito[^\n]+\n')
-        texto = re.sub(regexp,'',texto)
+        texto = re.sub(regexp,' ',texto)
         regexp = re.compile(r'[\n\s]Comentar[^\n]+\n')
-        return re.sub(regexp,'',texto)
+        texto = re.sub(regexp,' ',texto)
+        regexp = re.compile(r'[\n\s]Fuente[^\n]+\n')
+        texto = re.sub(regexp,' ',texto)
+        regexp = re.compile(r'[\n\s]Crédito[^\n]+\n')
+        return re.sub(regexp,' ',texto)
 
     def parsear_fecha(self, entrada):
         return dateutil.parser.parse(entrada.updated)
@@ -49,7 +53,7 @@ class Infobae(Diario):
         for tag, url_feed in self.feeds.items():
             for entrada in fp.parse(url_feed).entries:
                 titulo = entrada.title
-                texto = re.sub(tag_regexp,'',entrada.content[0].value)
+                texto = re.sub(tag_regexp,' ',entrada.content[0].value)
                 fecha = dateutil.parser.parse(entrada.published)  - datetime.timedelta(hours=3)
                 url = entrada.link
                 if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url}).count() > 0: # si existe ya la noticia (url), no la decargo
@@ -124,8 +128,8 @@ class CasaRosada(Diario):
 
         for entrada in entradas:
             titulo = entrada.title
-            texto = bs(re.sub(tag_regexp,'',entrada.summary), features="lxml").text
-            texto_limpio = re.sub(primer_linea_regexp,'',texto)
+            texto = bs(re.sub(tag_regexp,' ',entrada.summary), features="lxml").text
+            texto_limpio = re.sub(primer_linea_regexp,' ',texto)
             if len(texto_limpio) == 0:
                 texto_limpio = texto
                 
@@ -148,8 +152,8 @@ class CasaRosada(Diario):
             feed = fp.parse(url_feed)
             for entrada in feed.entries:
                 titulo = entrada.title
-                texto = bs(re.sub(tag_regexp,'',entrada.summary), features="lxml").text
-                texto_limpio = re.sub(primer_linea_regexp,'',texto)
+                texto = bs(re.sub(tag_regexp,' ',entrada.summary), features="lxml").text
+                texto_limpio = re.sub(primer_linea_regexp,' ',texto)
                 if len(texto_limpio) == 0:
                     texto_limpio = texto
 
