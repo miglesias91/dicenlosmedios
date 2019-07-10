@@ -60,6 +60,7 @@ def top(parametros):
     fecha = parametros['fecha']
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
+    twittear = parametros['twittear']
 
     kiosco = Kiosco()
 
@@ -106,29 +107,31 @@ def top(parametros):
 
         print(texto)
 
-        claves = open("twitter.keys", "r")
-        json_claves = json.load(claves)
+        if twittear:
+            claves = open("twitter.keys", "r")
+            json_claves = json.load(claves)
 
-        consumer_key = json_claves['consumer_key']
-        consumer_secret = json_claves['consumer_secret']
-        access_token = json_claves['access_token']
-        access_token_secret = json_claves['access_token_secret']
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        auth.set_access_token(access_token, access_token_secret)
-        api = tweepy.API(auth)
+            consumer_key = json_claves['consumer_key']
+            consumer_secret = json_claves['consumer_secret']
+            access_token = json_claves['access_token']
+            access_token_secret = json_claves['access_token_secret']
+            auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+            auth.set_access_token(access_token, access_token_secret)
+            api = tweepy.API(auth)
 
-        dic_top_100 = dict(top_100)
-        wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
-        wordcloud.recolor(100)
-        path_imagen = tag + ".png"
-        wordcloud.to_file(path_imagen)
-        api.update_with_media(filename=path_imagen, status=texto)
+            dic_top_100 = dict(top_100)
+            wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
+            wordcloud.recolor(100)
+            path_imagen = tag + ".png"
+            wordcloud.to_file(path_imagen)
+            api.update_with_media(filename=path_imagen, status=texto)
 
 def top_personas(parametros):
  #¡¡¡¡¡¡¡¡¡¡ MEJORAR RESULTADOS !!!!!!!!!!!!!!!    
     fecha = parametros['fecha']
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
+    twittear = parametros['twittear']
 
     kiosco = Kiosco()
 
@@ -206,20 +209,24 @@ def main():
 
     medios = args
 
-    parametros = {'medios':medios}
+    parametros = {'medios':medios, 'fecha':fecha, 'twittear':twittear}
     for o, a in opts:
         if o == "--help" or o == "-h":
             usage()
         elif o == "--leer":
             accion=leer_medios
         elif o == "--top":
-            if a:
-                top_max = a
+            try:
+                top_max = int(a)
+            except ValueError:
+                pass
             parametros['top_max'] = top_max
             accion=top
         elif o == "--top-personas":
-            if a:
-                top_max = a
+            try:
+                top_max = int(a)
+            except ValueError:
+                pass
             parametros['top_max'] = top_max
             accion=top_personas
         elif o == "--fecha":
@@ -236,6 +243,7 @@ def main():
 
         elif o == "--twittear":
             twittear = True
+            parametros['twittear'] = twittear
         else:
             assert False, "opción desconocida"
     
