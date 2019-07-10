@@ -125,6 +125,7 @@ def top(parametros):
         api.update_with_media(filename=path_imagen, status=texto)
 
 def top_personas(parametros):
+ #¡¡¡¡¡¡¡¡¡¡ MEJORAR RESULTADOS !!!!!!!!!!!!!!!    
     fecha = parametros['fecha']
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
