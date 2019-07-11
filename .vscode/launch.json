@@ -40,7 +40,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--top-personas", "20", "--fecha", "20190101-20190201", "clarin", "lanacion", "infobae", "paginadoce", "eldestape", "casarosada"]
+            "args":["--top-personas", "20"]
         }
     ]
 }

@@ -11,7 +11,7 @@ from wordcloud import WordCloud as wc
 
 from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce, CasaRosada
 from ia import txt
-from ia.txt import NLP, freq
+from ia.txt import NLP
 from bd.entidades import Kiosco
 
 def leer_medios(parametros):
@@ -55,7 +55,7 @@ def leer_medios(parametros):
         casarosada.leer()
         kiosco.actualizar_diario(casarosada)
 
-def top(parametros):
+def top_terminos(parametros):
     fecha = parametros['fecha']
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
@@ -92,7 +92,7 @@ def top(parametros):
 
         texto = "Top " +  str(top_max) + " palabras más frecuentes en las noticias de " + twitter + " del " + string_fecha + "\n"
 
-        top_100 = nlp.top(textos, n=100)
+        top_100 = nlp.top_terminos(textos, n=100)
 
         i = 0
         for nombre, m in top_100:
@@ -232,7 +232,7 @@ def main():
             except ValueError:
                 pass
             parametros['top_max'] = top_max
-            accion=top
+            accion=top_terminos
         elif o == "--top-personas":
             try:
                 top_max = int(a)

@@ -29,7 +29,7 @@ class NLP:
         self.verbos_lista = codecs.open("verbos.txt", 'r', encoding="utf-8").read().split("\r\n")
         self.sustantivos_lista = codecs.open("sustantivos.txt", 'r', encoding="utf-8").read().split("\r\n")
 
-    def top(self, textos, n=10):
+    def top_terminos(self, textos, n=10):
         oraciones = self.__bolsa_de_oraciones_y_palabras__(textos)
 
         frases = Phrases(oraciones, min_count=30, progress_per=10000)
@@ -47,19 +47,28 @@ class NLP:
     def top_personas(self, textos, n=10):
         oraciones = self.__bolsa_de_personas__(textos)
 
-        frases = Phrases(oraciones, min_count=30, progress_per=10000)
-        bigram = Phraser(frases)
+        bifrases = Phrases(oraciones, min_count=3, progress_per=10000)
+        bigrams = Phraser(bifrases)
+        oraciones_con_bigramas = bigrams[oraciones]
 
-        oraciones_con_bigramas = bigram[oraciones]
+        trifrases = Phrases(oraciones_con_bigramas, min_count=3, progress_per=10000)
+        trigrams = Phraser(trifrases)
+        oraciones_con_trigramas = trigrams[oraciones_con_bigramas]
 
         personas_freq = defaultdict(int)
         for sent in oraciones_con_bigramas:
             for i in sent:
                 personas_freq[i] += 1
 
+        personas_freq_tri = defaultdict(int)
+        for sent in oraciones_con_trigramas:
+            for i in sent:
+                personas_freq_tri[i] += 1
+
         personas_freq_limpio = defaultdict(int)
+        signos = string.punctuation + "¡¿\n"
         for nombre, valor_apellido in personas_freq.items():
-            personas_freq_limpio[nombre.replace('\n', '')] = valor_apellido
+            personas_freq_limpio[nombre.translate(str.maketrans('','', signos))] = valor_apellido
 
         personas_freq = personas_freq_limpio
 
@@ -87,18 +96,22 @@ class NLP:
         return [(k, personas_freq[k]) for k in sorted(personas_freq, key=personas_freq.get, reverse=True)[:n]]
 
     def __bolsa_de_personas__(self, textos):
-        oraciones = []
+        personas = []
 
+        signos = string.punctuation + "¡¿\n"
         for doc in self.nlp.pipe(textos, n_threads=16, batch_size=10000):
             for oracion in doc.sents:
-                palabras_ok = [entidad.text for entidad in oracion.ents if entidad.label_ == "PER"]
+                personas_ok = [entidad.text.translate(str.maketrans('','', signos)).split() for entidad in oracion.ents if entidad.label_ == "PER"]
 
-                if len(palabras_ok) == 0:
+                if len(personas_ok) == 0:
                     continue
 
-                oraciones.append(palabras_ok)
+                lista = []
+                for persona in personas_ok:
+                    lista += persona                     
+                personas.append(lista)
 
-        return oraciones
+        return personas
 
     def __bolsa_de_oraciones_y_palabras__(self, textos):
         oraciones = []
@@ -166,35 +179,3 @@ class NLP:
 
         return palabras
 
-def freq(textos):
-    frecuencias = nltk.FreqDist()
-
-    for texto in textos:
-        
-        palabras = __bolsa_de_palabras__(texto)
-
-        # calculo freqdist
-        fdist = nltk.FreqDist(palabras)
-
-        for valor, freq in fdist.items():
-            frecuencias[valor] = frecuencias.get(valor, 0) + freq
-        
-    return frecuencias
-
-def freq_bigramas(textos):
-    frecuencias = nltk.FreqDist()
-
-    for texto in textos:
-        
-        palabras = __bolsa_de_palabras__(texto)
-
-        # armo bigramas
-        bigramas = nltk.bigrams(palabras)
-
-        # calculo freqdist
-        fdist = nltk.FreqDist(bigramas)
-
-        for valor, freq in fdist.items():
-            frecuencias[valor] = frecuencias.get(valor, 0) + freq
-        
-    return frecuencias
