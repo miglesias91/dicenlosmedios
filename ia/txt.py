@@ -2,6 +2,7 @@ import os
 
 from joblib import Parallel
 
+import datetime
 import string
 import codecs
 import multiprocessing
@@ -17,6 +18,8 @@ import gensim
 from gensim.models.phrases import Phraser, Phrases
 from gensim.models import Word2Vec
 
+from bd.entidades import Kiosco
+
 def crear_nlp(path):
         path.mkdir(parents=True)
         nlp = spacy.load('es_core_news_md')
@@ -28,6 +31,8 @@ class NLP:
         self.nlp = spacy.load('es_core_news_md')
         self.verbos_lista = codecs.open("verbos.txt", 'r', encoding="utf-8").read().split("\r\n")
         self.sustantivos_lista = codecs.open("sustantivos.txt", 'r', encoding="utf-8").read().split("\r\n")
+        self.bigramas = None
+        self.trigramas = None
 
     def top_terminos(self, textos, n=10):
         oraciones = self.__bolsa_de_oraciones_y_palabras__(textos)
@@ -179,3 +184,49 @@ class NLP:
 
         return palabras
 
+    def __entrenar_ngramas__(self):
+        # recupero las noticias de los ultimos 3 dias para armar los bigramas
+        hasta = datetime.datetime.now()
+        desde = hasta - datetime.timedelta(days=3)
+
+        kiosco = Kiosco()
+        textos = [noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(fecha={'desde':desde, 'hasta':hasta})]
+        oraciones = self.__bolsa_de_personas__(textos)
+
+        bifrases = Phrases(oraciones, min_count=3, threshold=2, progress_per=10000)
+        self.bigramas = Phraser(bifrases)
+        oraciones_con_bigramas = self.bigramas[oraciones]
+
+        trifrases = Phrases(oraciones_con_bigramas, min_count=5, threshold=3, progress_per=10000)
+        self.trigramas = Phraser(trifrases)
+        oraciones_con_trigramas = self.trigramas[oraciones_con_bigramas]
+
+        personas_freq = defaultdict(int)
+        for sent in oraciones_con_bigramas:
+            for i in sent:
+                personas_freq[i] += 1
+
+        personas_freq_tri = defaultdict(int)
+        for sent in oraciones_con_trigramas:
+            for i in sent:
+                personas_freq_tri[i] += 1
+
+        nombres_a_borrar = []
+        for nombre, freq in personas_freq_tri.items():
+            for nombre_2, freq_2 in personas_freq_tri.items():
+                if nombre != nombre_2 and nombre in nombre_2:
+                    personas_freq_tri[nombre_2] += freq
+                    nombres_a_borrar.append(nombre)
+                    break
+
+        for nombre in nombres_a_borrar:
+            del personas_freq_tri[nombre]  
+
+        top_bi = [(k, personas_freq[k]) for k in sorted(personas_freq, key=personas_freq.get, reverse=True)][:50]
+        top_tri = [(k, personas_freq_tri[k]) for k in sorted(personas_freq_tri, key=personas_freq_tri.get, reverse=True)][:50]
+
+        print(top_bi)
+        print("------")
+        print(top_tri)
+
+        return 1
