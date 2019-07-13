@@ -72,6 +72,8 @@ def top_terminos(parametros):
     nlp = NLP()
     for diario in config['diarios']:
         tag = diario['tag']
+        if tag == "casarosada":
+            continue
         if tag not in medios and len(medios) > 0:
             continue
 
