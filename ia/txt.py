@@ -31,8 +31,18 @@ class NLP:
         self.nlp = spacy.load('es_core_news_md')
         self.verbos_lista = codecs.open("verbos.txt", 'r', encoding="utf-8").read().split("\r\n")
         self.sustantivos_lista = codecs.open("sustantivos.txt", 'r', encoding="utf-8").read().split("\r\n")
-        self.bigramas = None
-        self.trigramas = None
+        self.ngramas = None
+        self.separador = ' '
+
+    def top(self, textos, n=10):
+
+        top_t = self.top_terminos(textos, n)
+        top_p = self.top_personas(textos, n)
+
+        top_todo = top_t + top_p
+
+        return sorted(top_todo, key=lambda tup: tup[1], reverse=True)[:n]
+
 
     def top_terminos(self, textos, n=10):
         oraciones = self.__bolsa_de_oraciones_y_palabras__(textos)
@@ -50,55 +60,47 @@ class NLP:
         return [(k, word_freq[k]) for k in sorted(word_freq, key=word_freq.get, reverse=True)[:n]]
 
     def top_personas(self, textos, n=10):
-        oraciones = self.__bolsa_de_personas__(textos)
+        # recupero las noticias de los ultimos 3 dias para armar los bigramas
+        hasta = datetime.datetime.now()
+        desde = hasta - datetime.timedelta(days=3)
 
-        bifrases = Phrases(oraciones, min_count=3, progress_per=10000)
-        bigrams = Phraser(bifrases)
-        oraciones_con_bigramas = bigrams[oraciones]
+        # si todavia no se calcularon los ngramas, los calculo
+        if self.ngramas == None:
+            kiosco = Kiosco()
+            set_entrenamiento = [noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(fecha={'desde':desde, 'hasta':hasta})]
+            personas = self.__bolsa_de_personas__(set_entrenamiento)
 
-        trifrases = Phrases(oraciones_con_bigramas, min_count=3, progress_per=10000)
-        trigrams = Phraser(trifrases)
-        oraciones_con_trigramas = trigrams[oraciones_con_bigramas]
+            bifrases = Phrases(personas, min_count=3, threshold=2, progress_per=10000)
+            bigramas = Phraser(bifrases)
+            oraciones_con_bigramas = bigramas[personas]
 
-        personas_freq = defaultdict(int)
-        for sent in oraciones_con_bigramas:
-            for i in sent:
-                personas_freq[i] += 1
+            trifrases = Phrases(oraciones_con_bigramas, min_count=5, threshold=3, progress_per=10000)
+            self.ngramas = Phraser(trifrases)
+
+        personas = self.__bolsa_de_personas__(textos)
+        personas_con_trigramas = self.ngramas[personas]
 
         personas_freq_tri = defaultdict(int)
-        for sent in oraciones_con_trigramas:
+        for sent in personas_con_trigramas:
             for i in sent:
                 personas_freq_tri[i] += 1
 
-        personas_freq_limpio = defaultdict(int)
-        signos = string.punctuation + "¡¿\n"
-        for nombre, valor_apellido in personas_freq.items():
-            personas_freq_limpio[nombre.translate(str.maketrans('','', signos))] = valor_apellido
+        top_tri = {k: personas_freq_tri[k] for k in sorted(personas_freq_tri, key=personas_freq_tri.get, reverse=True)[:100]}
 
-        personas_freq = personas_freq_limpio
+        nombres_a_borrar = []
+        for nombre, freq in top_tri.items():
+            for nombre_2, freq_2 in top_tri.items():
+                if nombre != nombre_2 and nombre in nombre_2:
+                    top_tri[nombre_2] += freq
+                    if nombres_a_borrar.count(nombre) == 0:
+                        nombres_a_borrar.append(nombre)
 
-        a_borrar=[]
-        for nombre, valor_apellido in personas_freq.items():
-            campos_apellido = nombre.split()
-            if len(campos_apellido) == 1:
-                for apellido_y_nombre, valor_a_y_n in personas_freq.items():
-                    if len(apellido_y_nombre.split()) > 1:
-                        if apellido_y_nombre.split()[-1] == nombre:
-                            personas_freq[apellido_y_nombre] += valor_apellido
-                            if a_borrar.count(nombre) == 0:
-                                a_borrar.append(nombre)
-            if len(campos_apellido) == 2:
-                for apellido_y_nombre, valor_a_y_n in personas_freq.items():
-                    if len(apellido_y_nombre.split()) > 2:
-                        if set(campos_apellido).issubset(apellido_y_nombre.split()):
-                            personas_freq[apellido_y_nombre] += valor_apellido
-                            if a_borrar.count(nombre) == 0:
-                                a_borrar.append(nombre)
+        for nombre in nombres_a_borrar:
+            del top_tri[nombre]
 
-        for nombre in a_borrar:
-            del personas_freq[nombre]
+        list_top_tri = [(k, top_tri[k]) for k in sorted(top_tri, key=top_tri.get, reverse=True) if k.count("_") > 0 ][:n]
 
-        return [(k, personas_freq[k]) for k in sorted(personas_freq, key=personas_freq.get, reverse=True)[:n]]
+        return [(concepto.replace('_', self.separador), numero) for concepto, numero in list_top_tri]
 
     def __bolsa_de_personas__(self, textos):
         personas = []
@@ -183,50 +185,3 @@ class NLP:
         palabras = [palabra for palabra in palabras if palabra]
 
         return palabras
-
-    def __entrenar_ngramas__(self):
-        # recupero las noticias de los ultimos 3 dias para armar los bigramas
-        hasta = datetime.datetime.now()
-        desde = hasta - datetime.timedelta(days=3)
-
-        kiosco = Kiosco()
-        textos = [noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(fecha={'desde':desde, 'hasta':hasta})]
-        oraciones = self.__bolsa_de_personas__(textos)
-
-        bifrases = Phrases(oraciones, min_count=3, threshold=2, progress_per=10000)
-        self.bigramas = Phraser(bifrases)
-        oraciones_con_bigramas = self.bigramas[oraciones]
-
-        trifrases = Phrases(oraciones_con_bigramas, min_count=5, threshold=3, progress_per=10000)
-        self.trigramas = Phraser(trifrases)
-        oraciones_con_trigramas = self.trigramas[oraciones_con_bigramas]
-
-        personas_freq = defaultdict(int)
-        for sent in oraciones_con_bigramas:
-            for i in sent:
-                personas_freq[i] += 1
-
-        personas_freq_tri = defaultdict(int)
-        for sent in oraciones_con_trigramas:
-            for i in sent:
-                personas_freq_tri[i] += 1
-
-        nombres_a_borrar = []
-        for nombre, freq in personas_freq_tri.items():
-            for nombre_2, freq_2 in personas_freq_tri.items():
-                if nombre != nombre_2 and nombre in nombre_2:
-                    personas_freq_tri[nombre_2] += freq
-                    nombres_a_borrar.append(nombre)
-                    break
-
-        for nombre in nombres_a_borrar:
-            del personas_freq_tri[nombre]  
-
-        top_bi = [(k, personas_freq[k]) for k in sorted(personas_freq, key=personas_freq.get, reverse=True)][:50]
-        top_tri = [(k, personas_freq_tri[k]) for k in sorted(personas_freq_tri, key=personas_freq_tri.get, reverse=True)][:50]
-
-        print(top_bi)
-        print("------")
-        print(top_tri)
-
-        return 1

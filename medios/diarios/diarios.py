@@ -18,6 +18,8 @@ class Clarin(Diario):
 
     def limpiar_texto(self, texto):
         regexp = re.compile(r'[\n\s]Newsletters[^\n]+\n')
+        texto = re.sub(regexp,' ',texto)
+        regexp = re.compile(r'[\n\s]Mirá también[^\n]+\n')
         return re.sub(regexp,' ',texto)
 
 class LaNacion(Diario):
@@ -58,7 +60,7 @@ class Infobae(Diario):
                 url = entrada.link
                 if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url}).count() > 0: # si existe ya la noticia (url), no la decargo
                     continue
-                self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=texto))
+                self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=self.limpiar_texto(texto)))
 
     def nueva_noticia(self, titulo, descripcion, texto, palabras_claves, imagen_url):
         pass
@@ -104,6 +106,10 @@ class ElDestape(Diario):
         elemento = feed.find(name='div', attrs={'class':'category-wrapper'})
         return elemento.next_element.replace('\n', '').strip().lower()
 
+    def limpiar_texto(self, texto):
+        regexp = re.compile(r'[\n\s]LEA MÁS[^\n]+\n')
+        return re.sub(regexp,' ',texto)
+
 class CasaRosada(Diario):
 
     def __init__(self):
@@ -115,7 +121,6 @@ class CasaRosada(Diario):
         print("leyendo '" + self.etiqueta + "'...")
 
         tag_regexp = re.compile(r'<[^>]+>')
-        primer_linea_regexp = re.compile(r'^[^\n]+\n')
 
         entradas = []
         url_feed_template = self.feeds['todo'] + "&start="
@@ -129,15 +134,12 @@ class CasaRosada(Diario):
         for entrada in entradas:
             titulo = entrada.title
             texto = bs(re.sub(tag_regexp,' ',entrada.summary), features="lxml").text
-            texto_limpio = re.sub(primer_linea_regexp,' ',texto)
-            if len(texto_limpio) == 0:
-                texto_limpio = texto
                 
             fecha = dateutil.parser.parse(entrada.published)
             url = entrada.link
             if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url}).count() > 0: # si existe ya la noticia (url), no la decargo
                 continue
-            self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria='todo', titulo=titulo, texto=texto_limpio))
+            self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria='todo', titulo=titulo, texto=self.limpiar_texto(texto)))
 
 
     def leer(self):
@@ -146,19 +148,22 @@ class CasaRosada(Diario):
         print("leyendo '" + self.etiqueta + "'...")
 
         tag_regexp = re.compile(r'<[^>]+>')
-        primer_linea_regexp = re.compile(r'^[^\n]+\n')
 
         for tag, url_feed in self.feeds.items():
             feed = fp.parse(url_feed)
             for entrada in feed.entries:
                 titulo = entrada.title
                 texto = bs(re.sub(tag_regexp,' ',entrada.summary), features="lxml").text
-                texto_limpio = re.sub(primer_linea_regexp,' ',texto)
-                if len(texto_limpio) == 0:
-                    texto_limpio = texto
 
                 fecha = dateutil.parser.parse(entrada.published)
                 url = entrada.link
                 if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url}).count() > 0: # si existe ya la noticia (url), no la decargo
                     continue
-                self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=texto_limpio))
+                self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=self.limpiar_texto(texto)))
+
+    def limpiar_texto(self, texto):
+        primer_linea_regexp = re.compile(r'^[^\n]+\n')
+        texto_limpio = re.sub(primer_linea_regexp,' ',texto)
+        if len(texto_limpio) == 0:
+            texto_limpio = texto
+        return texto_limpio
