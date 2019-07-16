@@ -41,6 +41,14 @@
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
             "args":["--top-personas", "20"]
+        },
+        {
+            "name": "dlm-top-lugares",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/dlm.py",
+            "console": "integratedTerminal",
+            "args":["--top-lugares", "20"]
         }
     ]
 }

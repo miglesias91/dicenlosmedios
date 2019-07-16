@@ -85,7 +85,7 @@ class NLP:
             for i in sent:
                 lugares_freq_tri[i] += 1
 
-        top_tri = {k: lugares_freq_tri[k] for k in sorted(lugares_freq_tri, key=lugares_freq_tri.get, reverse=True)[:100]}
+        top_tri = {k: lugares_freq_tri[k] for k in sorted(lugares_freq_tri, key=lugares_freq_tri.get, reverse=True)}
 
         nombres_a_borrar = []
         for nombre, freq in top_tri.items():
@@ -119,7 +119,7 @@ class NLP:
 
             trifrases = Phrases(oraciones_con_bigramas, min_count=5, threshold=3, progress_per=10000)
             self.ngramas_personas = Phraser(trifrases)
-
+        # ARREGLAR ESTOO !!!!!
         personas = self.__bolsa_de_personas__(textos)
         personas_con_trigramas = self.ngramas_personas[personas]
 
@@ -128,7 +128,7 @@ class NLP:
             for i in sent:
                 personas_freq_tri[i] += 1
 
-        top_tri = {k: personas_freq_tri[k] for k in sorted(personas_freq_tri, key=personas_freq_tri.get, reverse=True)[:100]}
+        top_tri = {k: personas_freq_tri[k] for k in sorted(personas_freq_tri, key=personas_freq_tri.get, reverse=True)}
 
         nombres_a_borrar = []
         for nombre, freq in top_tri.items():
@@ -137,6 +137,7 @@ class NLP:
                     top_tri[nombre_2] += freq
                     if nombres_a_borrar.count(nombre) == 0:
                         nombres_a_borrar.append(nombre)
+                    break
 
         for nombre in nombres_a_borrar:
             del top_tri[nombre]

@@ -13,6 +13,7 @@ from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaD
 from ia import txt
 from ia.txt import NLP
 from bd.entidades import Kiosco
+import utiles
 
 def leer_medios(parametros):
     medios = set(parametros['medios'])
@@ -60,6 +61,7 @@ def top_todo(parametros):
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
     twittear = parametros['twittear']
+    solo_titulos = parametros['solo_titulos']
 
     kiosco = Kiosco()
 
@@ -78,7 +80,11 @@ def top_todo(parametros):
 
         twitter = diario['twitter']
     
-        textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+        textos = []
+        if solo_titulos:
+            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]            
+        else:
+            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
 
         print("tag: " + tag +" textos: " + str(len(textos)))
 
@@ -136,6 +142,7 @@ def top_terminos(parametros):
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
     twittear = parametros['twittear']
+    solo_titulos = parametros['solo_titulos']
 
     kiosco = Kiosco()
 
@@ -154,7 +161,11 @@ def top_terminos(parametros):
 
         twitter = diario['twitter']
     
-        textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+        textos = []
+        if solo_titulos:
+            textos = [utiles.primer_letra_minuscula(noticia['titulo']) for noticia in kiosco.noticias(diario=tag, fecha=fecha)]            
+        else:
+            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
 
         print("tag: " + tag +" textos: " + str(len(textos)))
 
@@ -213,6 +224,7 @@ def top_personas(parametros):
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
     twittear = parametros['twittear']
+    solo_titulos = parametros['solo_titulos']
 
     kiosco = Kiosco()
 
@@ -230,7 +242,11 @@ def top_personas(parametros):
 
         twitter = diario['twitter']
     
-        textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+        textos = []
+        if solo_titulos:
+            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]            
+        else:
+            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
 
         print("tag: " + tag +" textos: " + str(len(textos)))
 
@@ -271,6 +287,7 @@ def top_lugares(parametros):
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
     twittear = parametros['twittear']
+    solo_titulos = parametros['solo_titulos']
 
     kiosco = Kiosco()
 
@@ -289,7 +306,11 @@ def top_lugares(parametros):
 
         twitter = diario['twitter']
     
-        textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+        textos = []
+        if solo_titulos:
+            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]            
+        else:
+            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
 
         print("tag: " + tag +" textos: " + str(len(textos)))
 
@@ -354,22 +375,19 @@ def usage():
     print("--fecha AAAAMMDD - selecciona las noticias con fecha AAAMMDD")
     print("--fecha AAAAMMDD_desde-AAAAMMDD_hasta - selecciona las noticias dentro del rango de fechas AAAAMMDD_desde -> AAAAMMDD_hasta ")
     print("--twittear - indica que el texto y la imagén resultante se suben a @dicenlosmedios")
+    print("--solo-titulos - indica que solo se analizan títulos")
 
 def main():
     accion = None
-    twittear = False
-    fecha = datetime.datetime.now().date()
     top_max = 10
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-lugares=", "fecha=", "twittear"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-lugares=", "fecha=", "twittear", "solo-titulos"])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
-    medios = args
-
-    parametros = {'medios':medios, 'fecha':fecha, 'twittear':twittear}
+    parametros = {'medios':args, 'fecha':datetime.datetime.now().date(), 'twittear':False, 'solo_titulos':False}
     for o, a in opts:
         if o == "--help" or o == "-h":
             usage()
@@ -404,6 +422,7 @@ def main():
             parametros['top_max'] = top_max
             accion=top_lugares
         elif o == "--fecha":
+            fecha = None
             if len(a.split('-')) == 2:
                 desde = datetime.datetime.strptime(a.split('-')[0], "%Y%m%d")
                 desde.replace(hour=0, minute=0, second=0)
@@ -416,8 +435,9 @@ def main():
             parametros['fecha'] = fecha
 
         elif o == "--twittear":
-            twittear = True
-            parametros['twittear'] = twittear
+            parametros['twittear'] = True
+        elif o == "--solo-titulos":
+            parametros['solo_titulos'] = True
         else:
             assert False, "opción desconocida"
     
