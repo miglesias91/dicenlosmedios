@@ -178,7 +178,7 @@ def top_terminos(parametros):
         else:
             string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Top " +  str(top_max) + " términos más frecuentes en las noticias de " + twitter + " del " + string_fecha + "\n"
+        texto = "Lo más frecuente en las noticias de " + twitter + " del " + string_fecha + "\n"
 
         top_100 = nlp.top_terminos(textos, n=top_max)
 
