@@ -115,13 +115,15 @@ class NLP:
 
             bifrases = Phrases(personas, min_count=3, threshold=2, progress_per=10000)
             bigramas = Phraser(bifrases)
-            oraciones_con_bigramas = bigramas[personas]
+            # oraciones_con_bigramas = bigramas[personas]
+            self.bigramas_personas = bigramas[personas]
 
-            trifrases = Phrases(oraciones_con_bigramas, min_count=5, threshold=3, progress_per=10000)
+            trifrases = Phrases(self.bigramas_personas, min_count=5, threshold=3, progress_per=10000)
             self.ngramas_personas = Phraser(trifrases)
         # ARREGLAR ESTOO !!!!!
         personas = self.__bolsa_de_personas__(textos)
-        personas_con_trigramas = self.ngramas_personas[personas]
+        personas_con_bigramas = self.bigramas_personas[personas]
+        personas_con_trigramas = self.ngramas_personas[personas_con_bigramas]
 
         personas_freq_tri = defaultdict(int)
         for sent in personas_con_trigramas:
