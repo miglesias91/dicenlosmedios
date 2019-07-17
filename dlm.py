@@ -9,6 +9,11 @@ import pathlib
 import tweepy
 from wordcloud import WordCloud as wc
 
+import matplotlib
+import matplotlib.pyplot as plt
+
+import numpy as np
+
 from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce, CasaRosada
 from ia import txt
 from ia.txt import NLP
@@ -60,6 +65,7 @@ def top_todo(parametros):
     fecha = parametros['fecha']
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
+    categorias = parametros['categorias']
     twittear = parametros['twittear']
     solo_titulos = parametros['solo_titulos']
 
@@ -82,9 +88,9 @@ def top_todo(parametros):
     
         textos = []
         if solo_titulos:
-            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]            
+            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
         else:
-            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]
 
         print("tag: " + tag +" textos: " + str(len(textos)))
 
@@ -141,6 +147,7 @@ def top_terminos(parametros):
     fecha = parametros['fecha']
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
+    categorias = parametros['categorias']
     twittear = parametros['twittear']
     solo_titulos = parametros['solo_titulos']
 
@@ -163,9 +170,9 @@ def top_terminos(parametros):
     
         textos = []
         if solo_titulos:
-            textos = [utiles.primer_letra_minuscula(noticia['titulo']) for noticia in kiosco.noticias(diario=tag, fecha=fecha)]            
+            textos = [utiles.primer_letra_minuscula(noticia['titulo']) for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
         else:
-            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]
 
         print("tag: " + tag +" textos: " + str(len(textos)))
 
@@ -223,6 +230,7 @@ def top_personas(parametros):
     fecha = parametros['fecha']
     top_max = parametros['top_max']
     medios = set(parametros['medios'])
+    categorias = parametros['categorias']
     twittear = parametros['twittear']
     solo_titulos = parametros['solo_titulos']
 
@@ -244,9 +252,9 @@ def top_personas(parametros):
     
         textos = []
         if solo_titulos:
-            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]            
+            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
         else:
-            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]
 
         print("tag: " + tag +" textos: " + str(len(textos)))
 
@@ -281,87 +289,29 @@ def top_personas(parametros):
 
         print(texto)
 
-def top_lugares(parametros):
-    # MEJORAR RESULTADOS !!!!!!!!!!!!!
-    fecha = parametros['fecha']
-    top_max = parametros['top_max']
-    medios = set(parametros['medios'])
-    twittear = parametros['twittear']
-    solo_titulos = parametros['solo_titulos']
+def heatmap():
+    categorias = ['politica', 'sociedad', 'economia', 'internacional']
+    medios = ['eldestape', 'clarin', 'infobae', 'lanacion', 'paginadoce']
+    data = []
+    k = Kiosco()
 
-    kiosco = Kiosco()
+    for cat in categorias:
+        lista_cat = []
+        for medio in medios:
+            n = k.contar_noticias(diario=medio, categorias=[cat], fecha=datetime.datetime.today().date())
+            lista_cat.append(n)
+        data.append(lista_cat)
 
-    with open('medios/diarios/config.yaml', 'r') as stream:
-        try:
-            config = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
+    conteo = np.array(data)
 
-    nlp = NLP()
-    nlp.separador = ''
-    for diario in config['diarios']:
-        tag = diario['tag']
-        if tag not in medios and len(medios) > 0:
-            continue
+    fig, ax = plt.subplots()
 
-        twitter = diario['twitter']
-    
-        textos = []
-        if solo_titulos:
-            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]            
-        else:
-            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, fecha=fecha)]
+    im, cbar = utiles.heatmap(conteo, categorias, medios, ax=ax,
+                    cmap="YlGn", cbarlabel="# de noticias el " + datetime.datetime.today().date().strftime("%d.%m.%Y"))
+    texts = utiles.annotate_heatmap(im, valfmt="{x}")
 
-        print("tag: " + tag +" textos: " + str(len(textos)))
-
-        if len(textos) == 0:
-            continue
-        
-        string_fecha = ""
-        if type(fecha) is dict:
-            string_fecha = fecha['desde'].strftime("%d.%m.%Y") + " al " + fecha['hasta'].strftime("%d.%m.%Y")
-        else:
-            string_fecha = fecha.strftime("%d.%m.%Y")
-
-        texto = "Top " +  str(top_max) + " lugares más frecuentes en las noticias de " + twitter + " del " + string_fecha + "\n"
-
-        top_lugares = nlp.top_lugares(textos, n=top_max)
-        i = 0
-        for nombre, m in top_lugares:
-            linea = ""
-            i += 1
-            if i >= 10:
-                linea = str(i) + ". #" + nombre + " " + str(m) + "\n"
-                texto += linea
-                break
-            else:
-                linea = str(i) + ".  #" + nombre + " " + str(m) + "\n"
-
-            if twittear and len(texto) + len(linea) > 220:
-                break
-            else:
-                texto += linea
-
-        print(texto)
-
-        if twittear:
-            claves = open("twitter.keys", "r")
-            json_claves = json.load(claves)
-
-            consumer_key = json_claves['consumer_key']
-            consumer_secret = json_claves['consumer_secret']
-            access_token = json_claves['access_token']
-            access_token_secret = json_claves['access_token_secret']
-            auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-            auth.set_access_token(access_token, access_token_secret)
-            api = tweepy.API(auth)
-
-            dic_top_100 = dict(top_todo)
-            wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
-            wordcloud.recolor(100)
-            path_imagen = tag + ".png"
-            wordcloud.to_file(path_imagen)
-            api.update_with_media(filename=path_imagen, status=texto)
+    fig.tight_layout()
+    plt.show()
 
 def usage():
     print("dlm (dicen-los-medios) v1.1")
@@ -371,23 +321,28 @@ def usage():
     print("--top-terminos [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de terminos de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-personas [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de personas de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-lugares [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de lugares de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
+    print("--estadisticas [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra estadísticas relevantes sobre los medios")
     print("PARAMETROS OPCIONALES")
-    print("--fecha AAAAMMDD - selecciona las noticias con fecha AAAMMDD")
-    print("--fecha AAAAMMDD_desde-AAAAMMDD_hasta - selecciona las noticias dentro del rango de fechas AAAAMMDD_desde -> AAAAMMDD_hasta ")
+    print("--categorias c1-c2-...-cn - analiza las noticias de las categorias c1, c2, ..., cn: CATEGORIAS DISPONIBLES: 'politica', 'economia', 'sociedad', 'internacional'")
+    print("--fecha AAAAMMDD - analiza las noticias con fecha AAAMMDD")
+    print("--fecha AAAAMMDD_desde-AAAAMMDD_hasta - analiza las noticias dentro del rango de fechas AAAAMMDD_desde -> AAAAMMDD_hasta ")
     print("--twittear - indica que el texto y la imagén resultante se suben a @dicenlosmedios")
     print("--solo-titulos - indica que solo se analizan títulos")
 
 def main():
+    heatmap()
+    return
+
     accion = None
     top_max = 10
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-lugares=", "fecha=", "twittear", "solo-titulos"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-lugares=", "fecha=", "categorias=", "twittear", "solo-titulos"])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
-    parametros = {'medios':args, 'fecha':datetime.datetime.now().date(), 'twittear':False, 'solo_titulos':False}
+    parametros = {'medios':args, 'fecha':datetime.datetime.now().date(), 'twittear':False, 'solo_titulos':False, 'categorias':''}
     for o, a in opts:
         if o == "--help" or o == "-h":
             usage()
@@ -433,6 +388,9 @@ def main():
                 fecha = datetime.datetime.strptime(a, "%Y%m%d")
 
             parametros['fecha'] = fecha
+
+        elif o == "--categorias":
+            parametros['categorias'] = a.split('-')
 
         elif o == "--twittear":
             parametros['twittear'] = True

@@ -1,5 +1,6 @@
 import dateutil
 import datetime
+import string
 import re
 import feedparser as fp
 import urllib.request
@@ -104,7 +105,8 @@ class ElDestape(Diario):
     def reconocer_categoria(self, raw_html):
         feed = bs(raw_html, 'html.parser')
         elemento = feed.find(name='div', attrs={'class':'category-wrapper'})
-        return elemento.next_element.replace('\n', '').strip().lower()
+        signos = string.punctuation + "¡¿\n"
+        return elemento.next_element.translate(str.maketrans('áéíóúý', 'aeiouy', signos)).strip().lower()
 
     def limpiar_texto(self, texto):
         regexp = re.compile(r'[\n\s]LEA MÁS[^\n]+\n')
