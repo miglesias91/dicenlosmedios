@@ -170,7 +170,7 @@ def top_terminos(parametros):
     
         textos = []
         if solo_titulos:
-            textos = [utiles.primer_letra_minuscula(noticia['titulo']) for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
+            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
         else:
             textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]
 
