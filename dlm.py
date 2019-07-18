@@ -103,7 +103,7 @@ def top_todo(parametros):
         else:
             string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Top " +  str(top_max) + " conceptos más frecuentes en las noticias de " + twitter + " del " + string_fecha + "\n"
+        texto = "Tendencias en las noticias de " + twitter + " del " + string_fecha + "\n"
 
         top_todo = nlp.top(textos, n=top_max)
         i = 0
@@ -185,7 +185,7 @@ def top_terminos(parametros):
         else:
             string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Lo más frecuente en las noticias de " + twitter + " del " + string_fecha + "\n"
+        texto = "Tendencias en las noticias de " + twitter + " del " + string_fecha + "\n"
 
         top_100 = nlp.top_terminos(textos, n=top_max)
 
@@ -267,7 +267,7 @@ def top_personas(parametros):
         else:
             string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Top " + str(top_max)  + " personas más frecuentes en las noticias de " + twitter + " del " + string_fecha + "\n"
+        texto = "Tendencias en las noticias de " + twitter + " del " + string_fecha + "\n"
 
         top_100 = nlp.top_personas(textos, n=top_max)
 
@@ -330,8 +330,8 @@ def usage():
     print("--solo-titulos - indica que solo se analizan títulos")
 
 def main():
-    heatmap()
-    return
+    # heatmap()
+    # return
 
     accion = None
     top_max = 10
