@@ -14,9 +14,10 @@ class Diario(Medio):
         Medio.__init__(self, etiqueta)
         self.noticias = []
         self.feeds = {}
-        self.configurar(self.etiqueta)
+        self.filtros = {}
+        self.configurar()
 
-    def configurar(self, etiqueta):
+    def configurar(self):
         with open('medios/diarios/config.yaml', 'r') as stream:
             try:
                 config = yaml.safe_load(stream)
@@ -28,7 +29,9 @@ class Diario(Medio):
                 continue
             for feed in diario['feeds']:
                 self.feeds[feed['tag']] = feed['url']
-
+                if 'filtro' in feed:
+                    self.filtros[feed['tag']] = feed['filtro']
+                    
     def leer(self):
         kiosco = Kiosco()
 

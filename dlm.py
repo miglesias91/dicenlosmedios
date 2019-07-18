@@ -369,13 +369,6 @@ def main():
                 pass
             parametros['top_max'] = top_max
             accion=top_personas
-        elif o == "--top-lugares":
-            try:
-                top_max = int(a)
-            except ValueError:
-                pass
-            parametros['top_max'] = top_max
-            accion=top_lugares
         elif o == "--fecha":
             fecha = None
             if len(a.split('-')) == 2:

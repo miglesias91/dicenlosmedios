@@ -2,4 +2,4 @@
 
 $ayer = (Get-Date).AddDays(-1).ToString("yyyyMMdd")
 
-py C:/Users/manuel/repos/dicenlosmedios/dlm.py --top-todo 10 --fecha $ayer --twittear clarin lanacion infobae paginadoce eldestape
+py C:/Users/manuel/repos/dicenlosmedios/dlm.py --top-todo 100 --fecha $ayer --twittear clarin lanacion infobae paginadoce eldestape
