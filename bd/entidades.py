@@ -47,7 +47,7 @@ class Kiosco:
 
         return self.bd.noticias.find(query, projection)
 
-    def contar_noticias(self, fecha=None, diario=None, categorias=None):
+    def contar_noticias(self, fecha=None, diario=None, categorias=None, url=None):
         query = {}
 
         if fecha:
@@ -65,5 +65,8 @@ class Kiosco:
         if categorias:
             if len(categorias) > 0:
                 query['cat']={"$in":categorias}
+
+        if url:
+            query['url']=url
 
         return self.bd.noticias.count_documents(query)

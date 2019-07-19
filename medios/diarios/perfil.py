@@ -14,7 +14,7 @@ class Diario(Medio):
         Medio.__init__(self, etiqueta)
         self.noticias = []
         self.feeds = {}
-        self.feed_noticias = ""
+        self.filtros = {}
         self.configurar()
 
     def configurar(self):
@@ -27,8 +27,6 @@ class Diario(Medio):
         for diario in config['diarios']:
             if diario['tag'] != self.etiqueta:
                 continue
-            if 'feed_noticias' in diario:
-                self.feed_noticias = diario['feed_noticias']
             for feed in diario['feeds']:
                 self.feeds[feed['tag']] = feed['url']
                 if 'filtro' in feed:

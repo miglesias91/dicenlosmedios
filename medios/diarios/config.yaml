@@ -1,6 +1,7 @@
 diarios:
   - tag: "lanacion"
     twitter: "@LANACION"
+    feed_noticias: "https://www.lanacion.com.ar/ln-news.xml"
     feeds:
       - tag: "politica"
         url: "http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=30"
@@ -14,15 +15,11 @@ diarios:
         url: "http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=131"
       - tag: "espectaculos"
         url: "http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=120"
-      - tag: "cultura"
-        url: "https://www.lanacion.com.ar/ln-news.xml"
-        filtro:
-          campo: "url"
-          valor: "/cultura/"
 
 
   - tag: "clarin"
     twitter: "@clarincom"
+    feed_noticias: "https://www.clarin.com/sitemap_google_news.xml"
     feeds:
       - tag: "politica"
         url: "https://www.clarin.com/rss/politica/"
@@ -59,6 +56,7 @@ diarios:
 
   - tag: "paginadoce"
     twitter: "@pagina12"
+    feed_noticias: "https://www.pagina12.com.ar/breakingnews.xml"
     feeds:
       - tag: "politica"
         url: "https://www.pagina12.com.ar/rss/secciones/el-pais/notas"
@@ -77,12 +75,14 @@ diarios:
 
   - tag: "eldestape"
     twitter: "@eldestapeweb"
+    feed_noticias: "https://www.eldestapeweb.com/sitemap-news.xml"
     feeds:
       - tag: "todo"
         url: "https://www.eldestapeweb.com/sitemap-news.xml"
 
   - tag: "casarosada"
     twitter: "@CasaRosada"
+    feed_noticias: "https://www.casarosada.gob.ar/informacion/discursos?format=feed"
     feeds:
       - tag: "todo"
         url: "https://www.casarosada.gob.ar/informacion/discursos?format=feed"

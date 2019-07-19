@@ -2,30 +2,16 @@ import unittest
 
 import newspaper as np
 
-from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce, CasaRosada
+from medios.diarios.clarin import Clarin
 
 class TestClarin(unittest.TestCase):
 
-    def test_leer_deportes(self):
-        noticias = []
+    def test_entradas_feed(self):
         c = Clarin()
-        for url_noticia, fecha in c.reconocer_urls_y_fechas_noticias(url_feed="https://www.clarin.com/rss/deportes/"):
-            noticia = c.nueva_noticia(url=url_noticia, categoria="deportes", diario="clarin")
-            noticias.append(noticia)
-        return 1
+        url_fecha_titulo_categoria = c.entradas_feed()
+        return len(url_fecha_titulo_categoria) == 1000
 
-    def test_leer_espectaculos(self):
-        noticias = []
+    def test_parsear_noticia(self):
         c = Clarin()
-        for url_noticia, fecha in c.reconocer_urls_y_fechas_noticias(url_feed="https://www.clarin.com/rss/espectaculos/"):
-            noticia = c.nueva_noticia(url=url_noticia, categoria="espectaculos", diario="clarin")
-            noticias.append(noticia)
-        return 1
-
-    def test_leer_cultura(self):
-        noticias = []
-        c = Clarin()
-        for url_noticia, fecha in c.reconocer_urls_y_fechas_noticias(url_feed="https://www.clarin.com/rss/cultura/"):
-            noticia = c.nueva_noticia(url=url_noticia, categoria="cultura", diario="clarin")
-            noticias.append(noticia)
+        texto = c.parsear_noticia(url="https://www.clarin.com/deportes/emotivo-mensaje-sergio-goycochea-carlos-bilardo-delicado-salud_0_ZiDQnKVGD.html")
         return 1
