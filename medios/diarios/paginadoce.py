@@ -1,73 +1,64 @@
 import dateutil
+import datetime
 import yaml
 import feedparser as fp
 import newspaper as np
+import re
+import string
+
+from urllib.request import Request, urlopen
+from bs4 import BeautifulSoup as bs
 
 from medios.medio import Medio
 from medios.diarios.noticia import Noticia
+from medios.diarios.diario import Diario
 
 from bd.entidades import Kiosco
 
-class Diario(Medio):
+class PaginaDoce(Diario):
 
-    def __init__(self, etiqueta):
-        Medio.__init__(self, etiqueta)
-        self.noticias = []
-        self.feeds = {}
-        self.filtros = {}
-        self.configurar()
-
-    def configurar(self):
-        with open('medios/diarios/config.yaml', 'r') as stream:
-            try:
-                config = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-
-        for diario in config['diarios']:
-            if diario['tag'] != self.etiqueta:
-                continue
-            for feed in diario['feeds']:
-                self.feeds[feed['tag']] = feed['url']
-                if 'filtro' in feed:
-                    self.filtros[feed['tag']] = feed['filtro']
+    def __init__(self):
+        Diario.__init__(self, "paginadoce")
                     
     def leer(self):
         kiosco = Kiosco()
 
         print("leyendo '" + self.etiqueta + "'...")
 
-        for tag, url_feed in self.feeds.items():
-            for url_noticia, fecha in self.reconocer_urls_y_fechas_noticias(url_feed=url_feed):
-                if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url_noticia}).count() > 0: # si existe ya la noticia (url), no la decargo
-                    continue
-                noticia = self.nueva_noticia(url=url_noticia, categoria=tag, diario=self.etiqueta)
-                if noticia == None:
-                    continue
-                if noticia.fecha == None:
-                    noticia.fecha = fecha
-                    
-                self.noticias.append(noticia)
+        for url, fecha in self.entradas_feed():
+            if kiosco.contar_noticias(diario=self.etiqueta, url=url): # si existe ya la noticia (url), no la decargo
+                continue
+            categoria, titulo, texto = self.parsear_noticia(url=url)
+            if texto == None:
+                continue
+            self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=categoria, titulo=titulo, texto=texto))
 
-    def limpiar_texto(self, texto):
-        return texto
+    def entradas_feed(self):
+        urls_fechas = []
+        req = Request(self.feed_noticias, headers={'User-Agent': 'Mozilla/5.0'})
+        feed = bs(urlopen(req).read(), 'html.parser')
+        for entrada in feed.find_all('url'):
+            url = entrada.loc.string
+            fecha = dateutil.parser.parse(entrada.find('news:publication_date').string)
+            urls_fechas.append((url, fecha))
+            
+        return urls_fechas
 
-    def reconocer_urls_y_fechas_noticias(self, url_feed):
-        urls_y_fechas = []
-        for entrada in fp.parse(url_feed).entries:
-            fecha = self.parsear_fecha(entrada)
-            urls_y_fechas.append((entrada.link, fecha))
-        return urls_y_fechas
-
-    def nueva_noticia(self, url, categoria, diario):
+    def parsear_noticia(self, url):
         articulo = np.Article(url=url, language='es')
         try:
             articulo.download()
             articulo.parse()
         except:
             return None
+        
+        signos = string.punctuation + "¡¿\n"
+        categoria = articulo.meta_keywords[0].translate(str.maketrans('áéíóúý', 'aeiouy', signos)).strip().lower()
 
-        return Noticia(fecha=articulo.publish_date, url=url, diario=diario, categoria=categoria, titulo=articulo.title, texto=self.limpiar_texto(articulo.text))
+        if categoria == "el pais":
+            categoria = "politica"
 
-    def parsear_fecha(self, entrada):
-        return dateutil.parser.parse(entrada.published)
+        if categoria == "el mundo":
+            categoria = "internacional"
+
+        return  categoria, articulo.title, articulo.text

@@ -31,9 +31,6 @@ class Infobae(Diario):
                 texto = re.sub(tag_regexp,' ',entrada.content[0].value)
                 fecha = dateutil.parser.parse(entrada.published)  - datetime.timedelta(hours=3)
                 url = entrada.link
-                if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url}).count() > 0: # si existe ya la noticia (url), no la decargo
+                if kiosco.contar_noticias(diario=self.etiqueta, url=url): # si existe ya la noticia (url), no la decargo
                     continue
                 self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=self.limpiar_texto(texto)))
-
-    def nueva_noticia(self, titulo, descripcion, texto, palabras_claves, imagen_url):
-        pass

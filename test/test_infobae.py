@@ -5,16 +5,11 @@ import yaml
 import feedparser as fp
 import newspaper as np
 
-from medios.diarios.lanacion import LaNacion
+from medios.diarios.infobae import Infobae
 
 class TestLaNacion(unittest.TestCase):
 
     def test_entradas_feed(self):
-        ln = LaNacion()
-        url_fecha_titulo_categoria = ln.entradas_feed()
-        return len(url_fecha_titulo_categoria) == 1000
-
-    def test_parsear_noticia(self):
-        ln = LaNacion()
-        texto = ln.parsear_noticia(url="https://www.lanacion.com.ar/buenos-aires/mas-80-mil-pasajeros-viajan-aerolineas-argentinas-nid2269404")
+        i = Infobae()
+        i.leer()
         return 1
