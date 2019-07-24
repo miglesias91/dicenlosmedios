@@ -5,6 +5,8 @@ import datetime
 from collections import defaultdict
 import yaml
 import pathlib
+from  joblib import Parallel, delayed
+import multiprocessing
 
 import tweepy
 from wordcloud import WordCloud as wc
@@ -14,16 +16,49 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce, CasaRosada
+# from medios.diarios.diarios import Clarin, ElDestape, Infobae, LaNacion, PaginaDoce, CasaRosada
+from medios.diarios.clarin import Clarin
+from medios.diarios.lanacion import LaNacion
+from medios.diarios.eldestape import ElDestape
+from medios.diarios.paginadoce import PaginaDoce
+from medios.diarios.infobae import Infobae
+from medios.diarios.telam import Telam
+from medios.diarios.perfil import Perfil
+from medios.diarios.ambito import Ambito
+from medios.diarios.tn import TN
+from medios.diarios.casarosada import CasaRosada
+
 from ia import txt
 from ia.txt import NLP
 from bd.entidades import Kiosco
 import utiles
 
-def leer_medios(parametros):
-    medios = set(parametros['medios'])
+def leer_medio_aux():
+    print(1)
+
+def leer_medio(medio):
+    # print(medio.etiqueta)
+    # return
+    medio.leer()
 
     kiosco = Kiosco()
+    kiosco.actualizar_diario(medio)
+
+def leer_medios(parametros):
+    medios_a_leer = set(parametros['medios'])
+
+    medios = [Clarin(), LaNacion(), ElDestape(), PaginaDoce(), Infobae(), Telam(), Perfil(), Ambito(), TN(), CasaRosada()]
+
+    num_cores = multiprocessing.cpu_count()
+    Parallel(prefer="threads",n_jobs=num_cores)(delayed(leer_medio)(medio) for medio in medios if medio.etiqueta in medios_a_leer or len(medios_a_leer) == 0)
+
+    return
+
+    kiosco = Kiosco()
+    for medio in medios:
+        if medio.etiqueta in medios_a_leer or len(medios_a_leer) == 0:
+            medio.leer()
+            kiosco.actualizar_diario(medio)
 
     # infobae.com
     infobae = Infobae()
@@ -54,6 +89,30 @@ def leer_medios(parametros):
     if p12.etiqueta in medios or len(medios) == 0:
         p12.leer()
         kiosco.actualizar_diario(p12)
+
+    # telam.com.ar
+    telam = Telam()
+    if telam.etiqueta in medios or len(medios) == 0:
+        telam.leer()
+        kiosco.actualizar_diario(telam)
+
+    # perfil.com.ar
+    perfil = Perfil()
+    if perfil.etiqueta in medios or len(medios) == 0:
+        perfil.leer()
+        kiosco.actualizar_diario(perfil)
+
+    # ambito.com.ar
+    ambito = Ambito()
+    if ambito.etiqueta in medios or len(medios) == 0:
+        ambito.leer()
+        kiosco.actualizar_diario(ambito)
+
+    # tn.com.ar
+    tn = TN()
+    if tn.etiqueta in medios or len(medios) == 0:
+        tn.leer()
+        kiosco.actualizar_diario(tn)
 
     # casarosada.com
     casarosada = CasaRosada()
@@ -289,12 +348,12 @@ def top_personas(parametros):
 
         print(texto)
 
-def heatmap():
-    categorias = ['politica', 'sociedad', 'economia', 'internacional']
-    medios = ['eldestape', 'clarin', 'infobae', 'lanacion', 'paginadoce']
+def intensidad(parametros):
+    categorias = ['politica', 'sociedad', 'economia', 'internacional', 'deportes', 'espectaculos', 'cultura']
+    medios = ['eldestape', 'clarin', 'infobae', 'lanacion', 'paginadoce', 'telam', 'perfil', 'tn', 'ambito']
     data = []
     k = Kiosco()
-
+# PASAR A PORCENTAJES !!!
     for cat in categorias:
         lista_cat = []
         for medio in medios:
@@ -320,10 +379,9 @@ def usage():
     print("--top-todo [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de terminos, palabras, etc, etct, de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-terminos [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de terminos de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-personas [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de personas de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
-    print("--top-lugares [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de lugares de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
-    print("--estadisticas [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra estadísticas relevantes sobre los medios")
+    print("--intensidad [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra la intensidad de noticias de los medios segun la categoria")
     print("PARAMETROS OPCIONALES")
-    print("--categorias c1-c2-...-cn - analiza las noticias de las categorias c1, c2, ..., cn: CATEGORIAS DISPONIBLES: 'politica', 'economia', 'sociedad', 'internacional'")
+    print("--categorias c1-c2-...-cn - analiza las noticias de las categorias c1, c2, ..., cn: CATEGORIAS DISPONIBLES: 'politica', 'economia', 'sociedad', 'internacional', 'cultura', 'espectaculos', 'deportes'")
     print("--fecha AAAAMMDD - analiza las noticias con fecha AAAMMDD")
     print("--fecha AAAAMMDD_desde-AAAAMMDD_hasta - analiza las noticias dentro del rango de fechas AAAAMMDD_desde -> AAAAMMDD_hasta ")
     print("--twittear - indica que el texto y la imagén resultante se suben a @dicenlosmedios")
@@ -336,7 +394,7 @@ def main():
     accion = None
     top_max = 10
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-lugares=", "fecha=", "categorias=", "twittear", "solo-titulos"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "intensidad", "fecha=", "categorias=", "twittear", "solo-titulos"])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -369,6 +427,8 @@ def main():
                 pass
             parametros['top_max'] = top_max
             accion=top_personas
+        elif o == "--intensidad":
+            accion=intensidad
         elif o == "--fecha":
             fecha = None
             if len(a.split('-')) == 2:

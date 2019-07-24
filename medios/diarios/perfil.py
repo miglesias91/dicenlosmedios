@@ -1,65 +1,48 @@
 import dateutil
+import datetime
 import yaml
 import feedparser as fp
 import newspaper as np
+import re
+
+from urllib.request import Request, urlopen
+from bs4 import BeautifulSoup as bs
 
 from medios.medio import Medio
 from medios.diarios.noticia import Noticia
+from medios.diarios.diario import Diario
 
 from bd.entidades import Kiosco
 
-class Diario(Medio):
+class Perfil(Diario):
 
-    def __init__(self, etiqueta):
-        Medio.__init__(self, etiqueta)
-        self.noticias = []
-        self.feeds = {}
-        self.filtros = {}
-        self.configurar()
-
-    def configurar(self):
-        with open('medios/diarios/config.yaml', 'r') as stream:
-            try:
-                config = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-
-        for diario in config['diarios']:
-            if diario['tag'] != self.etiqueta:
-                continue
-            for feed in diario['feeds']:
-                self.feeds[feed['tag']] = feed['url']
-                if 'filtro' in feed:
-                    self.filtros[feed['tag']] = feed['filtro']
+    def __init__(self):
+        Diario.__init__(self, "perfil")
                     
     def leer(self):
         kiosco = Kiosco()
 
         print("leyendo '" + self.etiqueta + "'...")
 
-        for tag, url_feed in self.feeds.items():
-            for url_noticia, fecha in self.reconocer_urls_y_fechas_noticias(url_feed=url_feed):
-                if kiosco.bd.noticias.find(filter={'diario':self.etiqueta, 'url':url_noticia}).count() > 0: # si existe ya la noticia (url), no la decargo
+        for categoria, url_feed in self.feeds.items():
+            for url, fecha, titulo in self.entradas_feed(url_feed=url_feed):
+                if kiosco.contar_noticias(diario=self.etiqueta, url=url): # si existe ya la noticia (url), no la decargo
                     continue
-                noticia = self.nueva_noticia(url=url_noticia, categoria=tag, diario=self.etiqueta)
-                if noticia == None:
+                texto = self.parsear_noticia(url=url)
+                if texto == None:
                     continue
-                if noticia.fecha == None:
-                    noticia.fecha = fecha
-                    
-                self.noticias.append(noticia)
+                self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=categoria, titulo=titulo, texto=texto))
 
-    def limpiar_texto(self, texto):
-        return texto
-
-    def reconocer_urls_y_fechas_noticias(self, url_feed):
-        urls_y_fechas = []
+    def entradas_feed(self, url_feed):
+        entradas = []
         for entrada in fp.parse(url_feed).entries:
-            fecha = self.parsear_fecha(entrada)
-            urls_y_fechas.append((entrada.link, fecha))
-        return urls_y_fechas
+            titulo = entrada.title
+            fecha = dateutil.parser.parse(entrada.published)
+            url = entrada.link
+            entradas.append((url, fecha, titulo))
+        return entradas
 
-    def nueva_noticia(self, url, categoria, diario):
+    def parsear_noticia(self, url):
         articulo = np.Article(url=url, language='es')
         try:
             articulo.download()
@@ -67,7 +50,12 @@ class Diario(Medio):
         except:
             return None
 
-        return Noticia(fecha=articulo.publish_date, url=url, diario=diario, categoria=categoria, titulo=articulo.title, texto=self.limpiar_texto(articulo.text))
+        return self.limpiar_texto(articulo.text)
 
-    def parsear_fecha(self, entrada):
-        return dateutil.parser.parse(entrada.published)
+    def limpiar_texto(self, texto):
+        regexp = re.compile(r'^[^\n]+\n')
+        texto = re.sub(regexp,' ',texto)
+        regexp = re.compile(r'\n[^\n]+$')
+        texto = re.sub(regexp,' ',texto)
+        texto = texto.replace('\n\n', ' ')
+        return texto

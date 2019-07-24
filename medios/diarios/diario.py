@@ -29,8 +29,9 @@ class Diario(Medio):
                 continue
             if 'feed_noticias' in diario:
                 self.feed_noticias = diario['feed_noticias']
-            for feed in diario['feeds']:
-                self.feeds[feed['tag']] = feed['url']
+            if 'feeds' in diario:
+                for feed in diario['feeds']:
+                    self.feeds[feed['tag']] = feed['url']
                     
     def leer(self):
         kiosco = Kiosco()
