@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -120,3 +122,15 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
             texts.append(text)
 
     return texts
+
+
+def cmap_del_dia():
+
+    cmaps = ['Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
+            'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
+            'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn']
+    
+    hoy = datetime.datetime.now()
+    idx = (hoy.year + hoy.month + hoy.day) % len(cmaps)
+
+    return cmaps[idx]

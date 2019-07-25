@@ -33,12 +33,7 @@ from ia.txt import NLP
 from bd.entidades import Kiosco
 import utiles
 
-def leer_medio_aux():
-    print(1)
-
 def leer_medio(medio):
-    # print(medio.etiqueta)
-    # return
     medio.leer()
 
     kiosco = Kiosco()
@@ -51,74 +46,6 @@ def leer_medios(parametros):
 
     num_cores = multiprocessing.cpu_count()
     Parallel(prefer="threads",n_jobs=num_cores)(delayed(leer_medio)(medio) for medio in medios if medio.etiqueta in medios_a_leer or len(medios_a_leer) == 0)
-
-    return
-
-    kiosco = Kiosco()
-    for medio in medios:
-        if medio.etiqueta in medios_a_leer or len(medios_a_leer) == 0:
-            medio.leer()
-            kiosco.actualizar_diario(medio)
-
-    # infobae.com
-    infobae = Infobae()
-    if infobae.etiqueta in medios or len(medios) == 0:
-        infobae.leer()
-        kiosco.actualizar_diario(infobae)
-
-    # clarin.com
-    clarin = Clarin()
-    if clarin.etiqueta in medios or len(medios) == 0:
-        clarin.leer()
-        kiosco.actualizar_diario(clarin)
-
-    # lanacion.com
-    lanacion = LaNacion()
-    if lanacion.etiqueta in medios or len(medios) == 0:
-        lanacion.leer()
-        kiosco.actualizar_diario(lanacion)
-
-    # eldestapeweb.com
-    eldestape = ElDestape()
-    if eldestape.etiqueta in medios or len(medios) == 0:
-        eldestape.leer()
-        kiosco.actualizar_diario(eldestape)
-
-    # pagina12.com
-    p12 = PaginaDoce()
-    if p12.etiqueta in medios or len(medios) == 0:
-        p12.leer()
-        kiosco.actualizar_diario(p12)
-
-    # telam.com.ar
-    telam = Telam()
-    if telam.etiqueta in medios or len(medios) == 0:
-        telam.leer()
-        kiosco.actualizar_diario(telam)
-
-    # perfil.com.ar
-    perfil = Perfil()
-    if perfil.etiqueta in medios or len(medios) == 0:
-        perfil.leer()
-        kiosco.actualizar_diario(perfil)
-
-    # ambito.com.ar
-    ambito = Ambito()
-    if ambito.etiqueta in medios or len(medios) == 0:
-        ambito.leer()
-        kiosco.actualizar_diario(ambito)
-
-    # tn.com.ar
-    tn = TN()
-    if tn.etiqueta in medios or len(medios) == 0:
-        tn.leer()
-        kiosco.actualizar_diario(tn)
-
-    # casarosada.com
-    casarosada = CasaRosada()
-    if casarosada.etiqueta in medios or len(medios) == 0:
-        casarosada.leer()
-        kiosco.actualizar_diario(casarosada)
 
 def top_todo(parametros):
     fecha = parametros['fecha']
@@ -146,8 +73,10 @@ def top_todo(parametros):
         twitter = diario['twitter']
     
         textos = []
+        contenido = "las noticias"
         if solo_titulos:
             textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
+            contenido = "los títulos"
         else:
             textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]
 
@@ -162,7 +91,7 @@ def top_todo(parametros):
         else:
             string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Tendencias en las noticias de " + twitter + " del " + string_fecha + "\n"
+        texto = "Tendencias en " + contenido +" de " + twitter + " del " + string_fecha + "\n"
 
         top_todo = nlp.top(textos, n=top_max)
         i = 0
@@ -196,7 +125,7 @@ def top_todo(parametros):
             api = tweepy.API(auth)
 
             dic_top_100 = dict(top_todo)
-            wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
+            wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap=utiles.cmap_del_dia(),min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
             wordcloud.recolor(100)
             path_imagen = tag + ".png"
             wordcloud.to_file(path_imagen)
@@ -228,8 +157,10 @@ def top_terminos(parametros):
         twitter = diario['twitter']
     
         textos = []
+        contenido = "las noticias"
         if solo_titulos:
             textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
+            contenido = "los títulos"
         else:
             textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]
 
@@ -244,7 +175,7 @@ def top_terminos(parametros):
         else:
             string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Tendencias en las noticias de " + twitter + " del " + string_fecha + "\n"
+        texto = "Tendencias en " + contenido + " de " + twitter + " del " + string_fecha + "\n"
 
         top_100 = nlp.top_terminos(textos, n=top_max)
 
@@ -279,7 +210,7 @@ def top_terminos(parametros):
             api = tweepy.API(auth)
 
             dic_top_100 = dict(top_100)
-            wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap='Blues',min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
+            wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap=utiles.cmap_del_dia(),min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
             wordcloud.recolor(100)
             path_imagen = tag + ".png"
             wordcloud.to_file(path_imagen)
@@ -310,8 +241,10 @@ def top_personas(parametros):
         twitter = diario['twitter']
     
         textos = []
+        contenido = "las noticias"
         if solo_titulos:
             textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
+            contenido = "los títulos"
         else:
             textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]
 
@@ -326,7 +259,7 @@ def top_personas(parametros):
         else:
             string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Tendencias en las noticias de " + twitter + " del " + string_fecha + "\n"
+        texto = "Tendencias en " + contenido + " de " + twitter + " del " + string_fecha + "\n"
 
         top_100 = nlp.top_personas(textos, n=top_max)
 
@@ -349,25 +282,52 @@ def top_personas(parametros):
         print(texto)
 
 def intensidad(parametros):
-    categorias = ['politica', 'sociedad', 'economia', 'internacional', 'deportes', 'espectaculos', 'cultura']
-    medios = ['eldestape', 'clarin', 'infobae', 'lanacion', 'paginadoce', 'telam', 'perfil', 'tn', 'ambito']
+    fecha = parametros['fecha']
+    medios = set(parametros['medios'])
+    categorias = parametros['categorias']
+    twittear = parametros['twittear']
+
+    if len(categorias) == 0:
+        categorias = ['politica', 'economia', 'sociedad', 'internacional', 'deportes', 'espectaculos', 'cultura']
+
+    if len(medios) == 0:
+        medios = set(['clarin', 'lanacion', 'infobae', 'paginadoce', 'eldestape', 'telam', 'perfil', 'ambito', 'tn'])
+
+    string_fecha = ""
+    if type(fecha) is dict:
+        string_fecha = fecha['desde'].strftime("%d.%m.%Y") + " al " + fecha['hasta'].strftime("%d.%m.%Y")
+    else:
+        string_fecha = fecha.strftime("%d.%m.%Y")
+
     data = []
     k = Kiosco()
-# PASAR A PORCENTAJES !!!
-    for cat in categorias:
-        lista_cat = []
-        for medio in medios:
-            n = k.contar_noticias(diario=medio, categorias=[cat], fecha=datetime.datetime.today().date())
-            lista_cat.append(n)
-        data.append(lista_cat)
+
+    with open('medios/diarios/config.yaml', 'r') as stream:
+        try:
+            config = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    etiqueta_medios = []
+    for diario in config['diarios']:
+        tag = diario['tag']
+        etiqueta_medios.append(diario['twitter'])
+        if tag not in medios and len(medios) > 0:
+            continue
+        lista_medio = []
+        total = k.contar_noticias(diario=tag, fecha=fecha)
+        for cat in categorias:
+            n = k.contar_noticias(diario=tag, categorias=[cat], fecha=fecha)
+            lista_medio.append(n)
+            total += n
+        data.append([n*100/total for n in lista_medio])
 
     conteo = np.array(data)
 
     fig, ax = plt.subplots()
 
-    im, cbar = utiles.heatmap(conteo, categorias, medios, ax=ax,
-                    cmap="YlGn", cbarlabel="# de noticias el " + datetime.datetime.today().date().strftime("%d.%m.%Y"))
-    texts = utiles.annotate_heatmap(im, valfmt="{x}")
+    im, cbar = utiles.heatmap(conteo, etiqueta_medios, categorias, ax=ax, cmap=utiles.cmap_del_dia(), cbarlabel=string_fecha)
+    texts = utiles.annotate_heatmap(im, valfmt="{x:.1f}")
 
     fig.tight_layout()
     plt.show()
