@@ -45,7 +45,7 @@ class ElDestape(Diario):
             signos = string.punctuation + "¡¿\n"
             categoria = entrada.find('news:keywords').string.translate(str.maketrans('áéíóúý', 'aeiouy', signos)).strip().lower()
 
-            if categoria == "internacinoales":
+            if categoria == "internacionales":
                 categoria = "internacional"
 
             urls_fechas_titulo_categoria.append((url, fecha, titulo, categoria))

@@ -41,6 +41,10 @@ class LaNacion(Diario):
             fecha = dateutil.parser.parse(entrada.find('news:publication_date').string)
             titulo = entrada.find('news:title').string           
             categoria = url.split('/')[3]
+
+            if categoria == "el-mundo":
+                categoria = "internacional"
+
             urls_fechas_titulo_categoria.append((url, fecha, titulo, categoria))
             
         return urls_fechas_titulo_categoria

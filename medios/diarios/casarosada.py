@@ -5,6 +5,7 @@ import feedparser as fp
 import newspaper as np
 import re
 
+import urllib
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup as bs
 
@@ -18,6 +19,51 @@ class CasaRosada(Diario):
 
     def __init__(self):
         Diario.__init__(self, "casarosada")
+
+    def leer_historico(self):
+        with open('medios/diarios/config.yaml', 'r') as stream:
+            try:
+                config = yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+
+        url_historica = ""
+        for diario in config['diarios']:
+            if diario['tag'] == self.etiqueta:
+                url_historica = diario['feed_historico']
+                break
+
+        entradas = []
+        url_historica = url_historica + "&start="
+        index = 0
+        feed = fp.parse(url_historica + str(index))
+        intentos = 0
+        while feed.bozo == 1 and intentos < 5:
+            feed = fp.parse(url_historica + str(index))
+            intentos += 1
+
+        while len(feed.entries) > 0:
+            entradas.extend(feed.entries)
+            index += 40
+            feed = fp.parse(url_historica + str(index))
+            intentos = 0
+            while feed.bozo == 1 and intentos < 5:
+                feed = fp.parse(url_historica + str(index))
+                intentos += 1      
+
+        # TERMINAR DE ARMAR ESTO !!!!
+        entradas = self.parsear_entradas()
+
+        urls_discursos = self.parsear_urls_discursos(entradas)
+
+        discursos = self.parsear_discursos(urls_discursos)
+
+        discursos = []
+        for entrada in entradas:
+            titulo = entrada.title
+            feed = bs(urllib.request.urlopen(entrada.link).read(), 'html.parser')
+            elemento = feed.find(name='div', attrs={'class':'discurso btn btn-primary'})
+
 
     def leer_todo(self):
         kiosco = Kiosco()
@@ -71,3 +117,13 @@ class CasaRosada(Diario):
         if len(texto_limpio) == 0:
             texto_limpio = texto
         return texto_limpio
+
+
+    def parsear_entradas(self):
+        pass
+
+    def parsear_url_discursos(self, entradas):
+        pass
+
+    def parsear_discursos(self, urls_discursos):
+        pass
