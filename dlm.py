@@ -91,7 +91,13 @@ def top_todo(parametros):
         else:
             string_fecha = fecha.strftime("%d.%m.%Y")
 
-        texto = "Tendencias en " + contenido +" de " + twitter + " del " + string_fecha + "\n"
+        categorias = ["#"+c for c in categorias]
+
+        secciones = ""
+        if len(categorias) > 0:
+            secciones = " de " + " y ".join([", ".join(categorias[:-1]),categorias[-1]] if len(categorias) > 2 else categorias)
+
+        texto = "Tendencias en " + contenido + secciones + " de " + twitter + " del " + string_fecha + "\n"
 
         top_todo = nlp.top(textos, n=top_max)
         i = 0
