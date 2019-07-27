@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "Python: Module",
             "type": "python",
@@ -49,6 +50,13 @@
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
             "args":["--top-lugares", "20"]
+        },
+        {
+            "name": "dlm-twittero",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/dlm-twittero.py",
+            "console": "integratedTerminal"
         }
     ]
 }

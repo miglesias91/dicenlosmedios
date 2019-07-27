@@ -24,14 +24,19 @@ k = Kiosco()
 # recupero el indice
 indice_twittero = k.bd.temp.find_one({'clave':'indice-twittero'})
 
-idx = 0
-if indice_twittero or idx > len(tuplas_tag_cat):
+if indice_twittero:
     idx = indice_twittero['idx']
-    # actualizo el indice de la bd: lo incremento en 1
-    k.bd.temp.update_one({'clave':'indice-twittero'}, {'$inc':{'idx':1}})
+    if idx < len(tuplas_tag_cat):
+        # actualizo el indice de la bd: lo incremento en 1
+        k.bd.temp.update_one({'clave':'indice-twittero'}, {'$inc':{'idx':1}})
+    else:
+        # si no existe el indice o ya supero el numero total de tuplas, entonces lo reseteo a 0
+        k.bd.temp.replace_one({'clave':'indice-twittero'}, {'clave':'indice-twittero', 'idx':1}, upsert=True)
+        idx = 0
 else:
     # si no existe el indice o ya supero el numero total de tuplas, entonces lo reseteo a 0
     k.bd.temp.replace_one({'clave':'indice-twittero'}, {'clave':'indice-twittero', 'idx':1}, upsert=True)
+    idx = 0
 
 tupla = tuplas_tag_cat[idx]
 fecha = datetime.datetime.now().date() - datetime.timedelta(days=1)
