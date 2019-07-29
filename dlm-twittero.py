@@ -30,16 +30,23 @@ if indice_twittero:
         # actualizo el indice de la bd: lo incremento en 1
         k.bd.temp.update_one({'clave':'indice-twittero'}, {'$inc':{'idx':1}})
     else:
-        # si no existe el indice o ya supero el numero total de tuplas, entonces lo reseteo a 0
-        k.bd.temp.replace_one({'clave':'indice-twittero'}, {'clave':'indice-twittero', 'idx':1}, upsert=True)
-        idx = 0
+        # si ya recorrio todas las tuplas, entonces quiere decir que ya twitteo todo. espero a que vuelvan a reinicar el idx.
+        exit
+        # si ya supero el numero total de tuplas, entonces lo reseteo a 0
+        # k.bd.temp.replace_one({'clave':'indice-twittero'}, {'clave':'indice-twittero', 'idx':1}, upsert=True)
+        # idx = 0
 else:
-    # si no existe el indice o ya supero el numero total de tuplas, entonces lo reseteo a 0
+    # si no existe el indice entonces lo reseteo a 0
     k.bd.temp.replace_one({'clave':'indice-twittero'}, {'clave':'indice-twittero', 'idx':1}, upsert=True)
     idx = 0
 
 tupla = tuplas_tag_cat[idx]
 fecha = datetime.datetime.now().date() - datetime.timedelta(days=1)
+
+while k.contar_noticias(fecha=fecha, diario=tupla[0], categorias=tupla[1]) == 0:
+    k.bd.temp.update_one({'clave':'indice-twittero'}, {'$inc':{'idx':1}})
+    idx += 1
+    tupla = tuplas_tag_cat[idx]
 
 parametros = {'medios':[tupla[0]], 'top_max':100, 'fecha':fecha, 'twittear':True, 'solo_titulos':False, 'categorias':[tupla[1]]}
 

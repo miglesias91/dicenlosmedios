@@ -56,7 +56,7 @@ def top_todo(parametros):
     solo_titulos = parametros['solo_titulos']
 
     kiosco = Kiosco()
-
+    
     with open('medios/diarios/config.yaml', 'r') as stream:
         try:
             config = yaml.safe_load(stream)

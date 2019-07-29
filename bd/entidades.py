@@ -63,8 +63,10 @@ class Kiosco:
             query['diario']=diario
 
         if categorias:
-            if len(categorias) > 0:
+            if type(categorias) is list and len(categorias) > 0:
                 query['cat']={"$in":categorias}
+            else:
+                query['cat']={"$in":[categorias]}
 
         if url:
             query['url']=url
