@@ -33,7 +33,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--top", "10", "--twittear", "--fecha", "20190709"]
+            "args":["--top-todo", "100", "--categorias", "cultura", "--fecha", "20190728" ,"clarin"]
         },
         {
             "name": "dlm-top-personas",
