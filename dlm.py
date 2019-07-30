@@ -130,11 +130,8 @@ def top_todo(parametros):
             auth.set_access_token(access_token, access_token_secret)
             api = tweepy.API(auth)
 
-            dic_top_100 = dict(top_todo)
-            wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap=utiles.cmap_del_dia(),min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
-            wordcloud.recolor(100)
             path_imagen = tag + ".png"
-            wordcloud.to_file(path_imagen)
+            utiles.nube_de_palabras(path=path_imagen, data=dict(top_todo))
             api.update_with_media(filename=path_imagen, status=texto)
 
 def top_terminos(parametros):
@@ -202,25 +199,6 @@ def top_terminos(parametros):
                 texto += linea
 
         print(texto)
-
-        if twittear:
-            claves = open("twitter.keys", "r")
-            json_claves = json.load(claves)
-
-            consumer_key = json_claves['consumer_key']
-            consumer_secret = json_claves['consumer_secret']
-            access_token = json_claves['access_token']
-            access_token_secret = json_claves['access_token_secret']
-            auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-            auth.set_access_token(access_token, access_token_secret)
-            api = tweepy.API(auth)
-
-            dic_top_100 = dict(top_100)
-            wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap=utiles.cmap_del_dia(),min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(dic_top_100)
-            wordcloud.recolor(100)
-            path_imagen = tag + ".png"
-            wordcloud.to_file(path_imagen)
-            api.update_with_media(filename=path_imagen, status=texto)
 
 def top_personas(parametros):
     fecha = parametros['fecha']
@@ -387,6 +365,8 @@ def intensidad(parametros):
             continue
         lista_medio = []
         total = k.contar_noticias(diario=tag, fecha=fecha)
+        if total == 0:
+            continue
         for cat in categorias:
             n = k.contar_noticias(diario=tag, categorias=[cat], fecha=fecha)
             lista_medio.append(n)
@@ -401,7 +381,8 @@ def intensidad(parametros):
     texts = utiles.annotate_heatmap(im, valfmt="{x:.1f}")
 
     fig.tight_layout()
-    plt.show()
+    # plt.show()
+    plt.savefig("intensidad.jpg")
 
 def usage():
     print("dlm (dicen-los-medios) v1.1")

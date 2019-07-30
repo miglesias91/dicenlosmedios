@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+from wordcloud import WordCloud as wc
+
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="", **kwargs):
     """
@@ -36,7 +38,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
 
     # Create colorbar
     cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
-    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+    cbar.ax.set_ylabel("%", rotation=0, va="bottom")
 
     # We want to show all ticks...
     ax.set_xticks(np.arange(data.shape[1]))
@@ -44,6 +46,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
     # ... and label them with the respective list entries.
     ax.set_xticklabels(col_labels)
     ax.set_yticklabels(row_labels)
+    ax.set_xlabel(cbarlabel, rotation=0, va="bottom")
 
     # Let the horizontal axes labeling appear on top.
     ax.tick_params(top=True, bottom=False,
@@ -123,6 +126,13 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 
     return texts
 
+def nube_de_palabras(path, data):
+    wordcloud = wc(font_path='C:\Windows\Fonts\consola.ttf',width=1280,height=720,background_color="black",colormap=cmap_del_dia(),min_font_size=14,prefer_horizontal=1,relative_scaling=1).generate_from_frequencies(data)
+    wordcloud.recolor(100)
+    wordcloud.to_file(path)
+
+def g_de_barras(path, data):
+    
 
 def cmap_del_dia():
 
@@ -134,3 +144,4 @@ def cmap_del_dia():
     idx = (hoy.year + hoy.month + hoy.day) % len(cmaps)
 
     return cmaps[idx]
+
