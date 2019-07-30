@@ -60,6 +60,21 @@ class NLP:
 
         return [(k, word_freq[k]) for k in sorted(word_freq, key=word_freq.get, reverse=True)[:n]]
 
+    def top_verbos(self, textos, n=10):
+        oraciones = self.__bolsa_de_oraciones_y_verbos__(textos)
+
+        frases = Phrases(oraciones, min_count=30, progress_per=10000)
+        bigram = Phraser(frases)
+
+        oraciones_con_bigramas = bigram[oraciones]
+
+        word_freq = defaultdict(int)
+        for sent in oraciones_con_bigramas:
+            for i in sent:
+                word_freq[i] += 1
+
+        return [(k, word_freq[k]) for k in sorted(word_freq, key=word_freq.get, reverse=True)[:n]]
+
     def top_personas(self, textos, n=10):
         if self.bigramas == None and self.trigramas == None:
             # si todavia no se calcularon los ngramas, los calculo
@@ -102,23 +117,23 @@ class NLP:
 
         return [(concepto.replace('_', self.separador), numero) for concepto, numero in list_top_tri]
 
-    def __bolsa_de_lugares__(self, textos):
-        lugares = []
+    def __bolsa_de_oraciones_y_verbos__(self, textos):
+        verbos = []
 
         signos = string.punctuation + "¡¿\n"
         for doc in self.nlp.pipe(textos, n_threads=16, batch_size=10000):
             for oracion in doc.sents:
-                lugares_ok = [entidad.text.translate(str.maketrans('','', signos)).split() for entidad in oracion.ents if entidad.label_ == "LOC"]
+                verbos_ok = [palabra.lemma_.translate(str.maketrans('','', signos)).split() for palabra in oracion if palabra.pos_ == "VERB"]
 
-                if len(lugares_ok) == 0:
+                if len(verbos_ok) == 0:
                     continue
 
                 lista = []
-                for lugar in lugares_ok:
-                    lista += lugar                     
-                lugares.append(lista)
+                for verbo in verbos_ok:
+                    lista += verbo                     
+                verbos.append(lista)
 
-        return lugares
+        return verbos
 
     def __bolsa_de_personas__(self, textos):
         personas = []
@@ -149,7 +164,8 @@ class NLP:
                 [terminos_entidades.extend(ent.text.translate(str.maketrans('','', signos)).split()) for ent in oracion.ents]
 
                 set_terminos_entidades = set(terminos_entidades)
-                palabras_ok = [palabra.text for palabra in oracion if self.__es_relevante__(palabra=palabra) and palabra.text not in set_terminos_entidades]
+                palabras_ok = [palabra.text.translate(str.maketrans('','', signos)) for palabra in oracion if self.__es_relevante__(palabra=palabra) and palabra.text not in set_terminos_entidades]
+                palabras_ok = [palabra for palabra in palabras_ok if len(palabra) > 1]
                 
                 if len(palabras_ok) == 0:
                     continue

@@ -33,7 +33,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--top-todo", "100", "--categorias", "cultura", "--fecha", "20190728" ,"clarin"]
+            "args":["--top-todo", "20", "--categorias", "deportes", "--fecha", "20190729" ,"paginadoce"]
         },
         {
             "name": "dlm-top-personas",
@@ -44,12 +44,12 @@
             "args":["--top-personas", "20"]
         },
         {
-            "name": "dlm-top-lugares",
+            "name": "dlm-top-verbos",
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--top-lugares", "20"]
+            "args":["--top-verbos", "100", "--categorias", "economia", "--fecha", "20190729", "clarin"]
         },
         {
             "name": "dlm-twittero",

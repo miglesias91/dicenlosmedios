@@ -287,6 +287,71 @@ def top_personas(parametros):
 
         print(texto)
 
+def top_verbos(parametros):
+    fecha = parametros['fecha']
+    top_max = parametros['top_max']
+    medios = set(parametros['medios'])
+    categorias = parametros['categorias']
+    twittear = parametros['twittear']
+    solo_titulos = parametros['solo_titulos']
+
+    kiosco = Kiosco()
+
+    with open('medios/diarios/config.yaml', 'r') as stream:
+        try:
+            config = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    nlp = NLP()
+    for diario in config['diarios']:
+        tag = diario['tag']
+        if tag not in medios and len(medios) > 0:
+            continue
+
+        twitter = diario['twitter']
+    
+        textos = []
+        contenido = "las noticias"
+        if solo_titulos:
+            textos = [noticia['titulo'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]            
+            contenido = "los títulos"
+        else:
+            textos = [noticia['titulo'] + " " + noticia['titulo'] + " " + noticia['texto'] for noticia in kiosco.noticias(diario=tag, categorias=categorias, fecha=fecha)]
+
+        print("tag: " + tag +" textos: " + str(len(textos)))
+
+        if len(textos) == 0:
+            continue
+        
+        string_fecha = ""
+        if type(fecha) is dict:
+            string_fecha = fecha['desde'].strftime("%d.%m.%Y") + " al " + fecha['hasta'].strftime("%d.%m.%Y")
+        else:
+            string_fecha = fecha.strftime("%d.%m.%Y")
+
+        texto = "Tendencias en " + contenido + " de " + twitter + " del " + string_fecha + "\n"
+
+        top_100 = nlp.top_verbos(textos, n=top_max)
+
+        i = 0
+        for nombre, m in top_100:
+            linea = ""
+            i += 1
+            if i >= 10:
+                linea = str(i) + ". #" + nombre + " " + str(m) + "\n"
+                texto += linea
+                break
+            else:
+                linea = str(i) + ".  #" + nombre + " " + str(m) + "\n"
+
+            if twittear and len(texto) + len(linea) > 220:
+                break
+            else:
+                texto += linea
+
+        print(texto)
+
 def intensidad(parametros):
     fecha = parametros['fecha']
     medios = set(parametros['medios'])
@@ -345,6 +410,7 @@ def usage():
     print("--top-todo [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de terminos, palabras, etc, etct, de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-terminos [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de terminos de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-personas [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de personas de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
+    print("--top-verbos [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de verbos de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--intensidad [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra la intensidad de noticias de los medios segun la categoria")
     print("PARAMETROS OPCIONALES")
     print("--categorias c1-c2-...-cn - analiza las noticias de las categorias c1, c2, ..., cn: CATEGORIAS DISPONIBLES: 'politica', 'economia', 'sociedad', 'internacional', 'cultura', 'espectaculos', 'deportes'")
@@ -360,7 +426,7 @@ def main():
     accion = None
     top_max = 10
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "intensidad", "fecha=", "categorias=", "twittear", "solo-titulos"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-verbos=", "intensidad", "fecha=", "categorias=", "twittear", "solo-titulos"])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -393,6 +459,13 @@ def main():
                 pass
             parametros['top_max'] = top_max
             accion=top_personas
+        elif o == "--top-verbos":
+            try:
+                top_max = int(a)
+            except ValueError:
+                pass
+            parametros['top_max'] = top_max
+            accion=top_verbos
         elif o == "--intensidad":
             accion=intensidad
         elif o == "--fecha":

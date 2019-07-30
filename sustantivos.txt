@@ -24,3 +24,5 @@ facebook
 instagram
 personas
 millones
+hs
+vs
