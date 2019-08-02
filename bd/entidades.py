@@ -72,3 +72,23 @@ class Kiosco:
             query['url']=url
 
         return self.bd.noticias.count_documents(query)
+
+    def categorias_existentes(self, fecha=None, diario=None, url=None):
+        query = {}
+
+        if fecha:
+            if type(fecha) is dict:
+                desde = datetime.datetime(fecha['desde'].year, fecha['desde'].month, fecha['desde'].day, 0,0,0)
+                hasta = datetime.datetime(fecha['hasta'].year, fecha['hasta'].month, fecha['hasta'].day, 23,59,59)                
+            else:
+                desde = datetime.datetime(fecha.year, fecha.month, fecha.day, 0,0,0)
+                hasta = datetime.datetime(fecha.year, fecha.month, fecha.day, 23,59,59)
+            query['fecha']={"$gte":desde, "$lte":hasta}
+
+        if diario:
+            query['diario']=diario
+
+        if url:
+            query['url']=url
+
+        return self.bd.noticias.distinct("cat", query)

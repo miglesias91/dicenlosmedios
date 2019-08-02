@@ -43,7 +43,8 @@ else:
 tupla = tuplas_tag_cat[idx]
 fecha = datetime.datetime.now().date() - datetime.timedelta(days=1)
 
-while k.contar_noticias(fecha=fecha, diario=tupla[0], categorias=tupla[1]) == 0:
+while k.contar_noticias(fecha=fecha, diario=tupla[0], categorias=tupla[1]) < 3:
+    # chequeo que hayan por lo menos 2 noticias para que el analisis sea representativo.
     k.bd.temp.update_one({'clave':'indice-twittero'}, {'$inc':{'idx':1}})
     idx += 1
     tupla = tuplas_tag_cat[idx]

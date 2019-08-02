@@ -53,7 +53,8 @@ class PaginaDoce(Diario):
             return None
         
         signos = string.punctuation + "¡¿\n"
-        categoria = articulo.meta_keywords[0].translate(str.maketrans('áéíóúý', 'aeiouy', signos)).strip().lower()
+        # categoria = articulo.meta_keywords[0].translate(str.maketrans('áéíóúý', 'aeiouy', signos)).strip().lower()
+        categoria = self.parsear_categoria(articulo.html)
 
         if categoria == "el pais":
             categoria = "politica"
@@ -62,3 +63,9 @@ class PaginaDoce(Diario):
             categoria = "internacional"
 
         return  categoria, articulo.title, articulo.text
+
+    def parsear_categoria(self, html):
+        feed = bs(html, 'lxml')
+        categoria = feed.find(lambda tag: tag.name == 'div' and tag.get('class') == ['suplement']).text
+        signos = string.punctuation + "¡¿\n"
+        return categoria.translate(str.maketrans('áéíóúý', 'aeiouy', signos)).strip().lower()

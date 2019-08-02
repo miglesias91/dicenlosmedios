@@ -119,20 +119,22 @@ def top_todo(parametros):
         print(texto)
 
         if twittear:
-            claves = open("twitter.keys", "r")
-            json_claves = json.load(claves)
+            # claves = open("twitter.keys", "r")
+            # json_claves = json.load(claves)
 
-            consumer_key = json_claves['consumer_key']
-            consumer_secret = json_claves['consumer_secret']
-            access_token = json_claves['access_token']
-            access_token_secret = json_claves['access_token_secret']
-            auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-            auth.set_access_token(access_token, access_token_secret)
-            api = tweepy.API(auth)
+            # consumer_key = json_claves['consumer_key']
+            # consumer_secret = json_claves['consumer_secret']
+            # access_token = json_claves['access_token']
+            # access_token_secret = json_claves['access_token_secret']
+            # auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+            # auth.set_access_token(access_token, access_token_secret)
+            # api = tweepy.API(auth)
 
             path_imagen = tag + ".png"
             utiles.nube_de_palabras(path=path_imagen, data=dict(top_todo))
-            api.update_with_media(filename=path_imagen, status=texto)
+            # api.update_with_media(filename=path_imagen, status=texto)
+            utiles.twittear(texto=texto, path_imagen=path_imagen)
+
 
 def top_terminos(parametros):
     fecha = parametros['fecha']
@@ -370,19 +372,68 @@ def intensidad(parametros):
         for cat in categorias:
             n = k.contar_noticias(diario=tag, categorias=[cat], fecha=fecha)
             lista_medio.append(n)
-            total += n
         data.append([n*100/total for n in lista_medio])
 
     conteo = np.array(data)
 
     fig, ax = plt.subplots()
 
-    im, cbar = utiles.heatmap(conteo, etiqueta_medios, categorias, ax=ax, cmap=utiles.cmap_del_dia(), cbarlabel=string_fecha)
+    im, cbar = utiles.heatmap(conteo, etiqueta_medios, categorias, ax=ax, cmap=utiles.cmap_del_dia(), cbarlabel=string_fecha, cbar_format="{x:.0f}%")
     texts = utiles.annotate_heatmap(im, valfmt="{x:.1f}")
 
     fig.tight_layout()
     # plt.show()
     plt.savefig("intensidad.jpg")
+
+def perfil(parametros):
+    fecha = parametros['fecha']
+    medios = set(parametros['medios'])
+    twittear = parametros['twittear']
+
+    if len(medios) == 0:
+        medios = set(['clarin', 'lanacion', 'infobae', 'paginadoce', 'eldestape', 'telam', 'perfil', 'ambito', 'tn'])
+
+    string_fecha = ""
+    if type(fecha) is dict:
+        string_fecha = fecha['desde'].strftime("%d.%m.%Y") + " al " + fecha['hasta'].strftime("%d.%m.%Y")
+    else:
+        string_fecha = fecha.strftime("%d.%m.%Y")
+
+    with open('medios/diarios/config.yaml', 'r') as stream:
+        try:
+            config = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    etiqueta_medios = []
+    k = Kiosco()
+    for diario in config['diarios']:
+        tag = diario['tag']
+        categorias = k.categorias_existentes(diario=tag)
+        etiqueta_medios = [diario['twitter']]
+        if tag not in medios:
+            continue
+        lista_medio = []
+        total = k.contar_noticias(diario=tag, fecha=fecha)
+        if total == 0:
+            continue
+        for cat in categorias:
+            n = k.contar_noticias(diario=tag, categorias=[cat], fecha=fecha)
+            lista_medio.append(n)
+
+        data = []
+        data.extend([n*100/total for n in lista_medio])
+        conteo = np.array(data)
+
+        utiles.graf_de_barras(path="perfil-" + tag + ".jpg", titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="%", data=data)
+
+        # fig, ax = plt.subplots()
+        # im, cbar = utiles.heatmap(conteo, etiqueta_medios, categorias, ax=ax, cmap=utiles.cmap_del_dia(), cbarlabel=string_fecha, cbar_format="{x:.0f}%")
+        # texts = utiles.annotate_heatmap(im, valfmt="{x:.1f}")
+
+        # fig.tight_layout()
+        # plt.show()
+        # plt.savefig("perfil-" + tag + ".jpg")
 
 def usage():
     print("dlm (dicen-los-medios) v1.1")
@@ -392,11 +443,12 @@ def usage():
     print("--top-terminos [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de terminos de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-personas [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de personas de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-verbos [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de verbos de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
-    print("--intensidad [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra la intensidad de noticias de los medios segun la categoria")
+    print("--intensidad [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra una tabla con la intensidad de noticias por categorias de todos los medios, a menos que se especifiquen los MEDIOS a incluir en la tabla")
+    print("--perfil [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra la cantidad de noticias por categoria de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("PARAMETROS OPCIONALES")
     print("--categorias c1-c2-...-cn - analiza las noticias de las categorias c1, c2, ..., cn: CATEGORIAS DISPONIBLES: 'politica', 'economia', 'sociedad', 'internacional', 'cultura', 'espectaculos', 'deportes'")
     print("--fecha AAAAMMDD - analiza las noticias con fecha AAAMMDD")
-    print("--fecha AAAAMMDD_desde-AAAAMMDD_hasta - analiza las noticias dentro del rango de fechas AAAAMMDD_desde -> AAAAMMDD_hasta ")
+    print("--fecha AAAAMMDD-AAAAMMDD - analiza las noticias dentro del rango de fechas AAAAMMDD->AAAAMMDD")
     print("--twittear - indica que el texto y la imagén resultante se suben a @dicenlosmedios")
     print("--solo-titulos - indica que solo se analizan títulos")
 
@@ -407,7 +459,7 @@ def main():
     accion = None
     top_max = 10
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-verbos=", "intensidad", "fecha=", "categorias=", "twittear", "solo-titulos"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-verbos=", "intensidad", "perfil", "fecha=", "categorias=", "twittear", "solo-titulos"])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -449,6 +501,8 @@ def main():
             accion=top_verbos
         elif o == "--intensidad":
             accion=intensidad
+        elif o == "--perfil":
+            accion=perfil
         elif o == "--fecha":
             fecha = None
             if len(a.split('-')) == 2:

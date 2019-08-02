@@ -52,6 +52,14 @@
             "args":["--top-verbos", "100", "--categorias", "economia", "--fecha", "20190729", "clarin"]
         },
         {
+            "name": "dlm-perfil",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/dlm.py",
+            "console": "integratedTerminal",
+            "args":["--perfil"]
+        },
+        {
             "name": "dlm-twittero",
             "type": "python",
             "request": "launch",

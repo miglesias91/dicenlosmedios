@@ -1,13 +1,15 @@
 import datetime
+import json
 
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
 from wordcloud import WordCloud as wc
+import tweepy
 
 def heatmap(data, row_labels, col_labels, ax=None,
-            cbar_kw={}, cbarlabel="", **kwargs):
+            cbar_kw={}, cbar_format="{x:.0f}", cbarlabel="", **kwargs):
     """
     Create a heatmap from a numpy array and two lists of labels.
 
@@ -37,8 +39,8 @@ def heatmap(data, row_labels, col_labels, ax=None,
     im = ax.imshow(data, **kwargs)
 
     # Create colorbar
-    cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
-    cbar.ax.set_ylabel("%", rotation=0, va="bottom")
+    cbar_formatter = matplotlib.ticker.StrMethodFormatter(cbar_format)    
+    cbar = ax.figure.colorbar(im, ax=ax, format=cbar_formatter, **cbar_kw)
 
     # We want to show all ticks...
     ax.set_xticks(np.arange(data.shape[1]))
@@ -46,7 +48,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
     # ... and label them with the respective list entries.
     ax.set_xticklabels(col_labels)
     ax.set_yticklabels(row_labels)
-    ax.set_xlabel(cbarlabel, rotation=0, va="bottom")
+    ax.set_xlabel(cbarlabel, rotation=0, va="baseline")
 
     # Let the horizontal axes labeling appear on top.
     ax.tick_params(top=True, bottom=False,
@@ -131,7 +133,19 @@ def nube_de_palabras(path, data):
     wordcloud.recolor(100)
     wordcloud.to_file(path)
 
-def g_de_barras(path, data):
+def graf_de_barras(path, titulo, etiquetas, unidad, data):
+    y_pos = np.arange(len(etiquetas))
+
+    fig, ax = plt.subplots()
+    plt.bar(y_pos, data, align='center', alpha=0.5)
+    plt.xticks(y_pos, etiquetas)
+    plt.setp(ax.get_xticklabels(), rotation=40, ha="right",
+             rotation_mode="anchor")
+    plt.ylabel(unidad)
+    plt.title(titulo)
+    plt.savefig(path)
+
+    # plt.show()
     
 
 def cmap_del_dia():
@@ -144,4 +158,18 @@ def cmap_del_dia():
     idx = (hoy.year + hoy.month + hoy.day) % len(cmaps)
 
     return cmaps[idx]
+
+def twittear(texto, path_imagen):
+    claves = open("twitter.keys", "r")
+    json_claves = json.load(claves)
+
+    consumer_key = json_claves['consumer_key']
+    consumer_secret = json_claves['consumer_secret']
+    access_token = json_claves['access_token']
+    access_token_secret = json_claves['access_token_secret']
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tweepy.API(auth)
+
+    api.update_with_media(filename=path_imagen, status=texto)
 
