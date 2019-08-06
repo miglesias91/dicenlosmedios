@@ -425,7 +425,8 @@ def perfil(parametros):
         data.extend([n*100/total for n in lista_medio])
         conteo = np.array(data)
 
-        utiles.graf_de_barras(path="perfil-" + tag + ".jpg", titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="%", data=data)
+        # utiles.histograma(path="perfil-" + tag + ".jpg", titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="%", data=data)
+        utiles.lollipop(path="perfil-" + tag + ".jpg", titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="%", valfmt="{x:.1f}%", data=data)
 
         # fig, ax = plt.subplots()
         # im, cbar = utiles.heatmap(conteo, etiqueta_medios, categorias, ax=ax, cmap=utiles.cmap_del_dia(), cbarlabel=string_fecha, cbar_format="{x:.0f}%")
@@ -453,9 +454,6 @@ def usage():
     print("--solo-titulos - indica que solo se analizan títulos")
 
 def main():
-    # heatmap()
-    # return
-
     accion = None
     top_max = 10
     try:

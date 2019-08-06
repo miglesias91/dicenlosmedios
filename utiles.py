@@ -1,9 +1,11 @@
 import datetime
 import json
 
+import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from wordcloud import WordCloud as wc
 import tweepy
@@ -133,7 +135,7 @@ def nube_de_palabras(path, data):
     wordcloud.recolor(100)
     wordcloud.to_file(path)
 
-def graf_de_barras(path, titulo, etiquetas, unidad, data):
+def histograma(path, titulo, etiquetas, unidad, data, valfmt="{x:.2f}"):
     y_pos = np.arange(len(etiquetas))
 
     fig, ax = plt.subplots()
@@ -146,7 +148,35 @@ def graf_de_barras(path, titulo, etiquetas, unidad, data):
     plt.savefig(path)
 
     # plt.show()
+
+def lollipop(path, titulo, etiquetas, unidad, data, valfmt="{x:.2f}"):
+    # Create a dataframe
+    df = pd.DataFrame({'etiquetas':etiquetas, 'valores':data })
+
+    a = df.etiquetas
+    b = df.valores
+
+
+    # Reorder it following the values:
+    ordered_df = df.sort_values(by='valores')
+    my_range=range(0,len(df.index))
     
+    # The vertival plot is made using the hline function
+    # I load the seaborn library only to benefit the nice looking feature
+    fig, ax = plt.subplots()
+
+    ax.hlines(y=ordered_df.etiquetas, xmin=0, xmax=ordered_df.valores, color='skyblue')
+    ax.plot(ordered_df.valores, my_range, "o")
+    
+    # Add titles and axis names
+    if isinstance(valfmt, str):
+        valfmt = matplotlib.ticker.StrMethodFormatter(valfmt)
+
+    plt.yticks(my_range, ordered_df.etiquetas)
+    plt.title(titulo, loc='left')
+    plt.xlabel(unidad)
+    plt.ylabel('Group')
+    plt.savefig(path)
 
 def cmap_del_dia():
 

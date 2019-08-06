@@ -57,7 +57,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--perfil"]
+            "args":["--perfil", "--fecha", "20190802"]
         },
         {
             "name": "dlm-twittero",
