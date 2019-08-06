@@ -70,7 +70,7 @@ def top_todo(parametros):
         if tag not in medios and len(medios) > 0:
             continue
 
-        twitter = diario['twitter']
+        hashtag = diario['hashtag']
     
         textos = []
         contenido = "las noticias"
@@ -97,7 +97,7 @@ def top_todo(parametros):
         if len(categorias) > 0:
             secciones = " de " + " y ".join([", ".join(categorias[:-1]),categorias[-1]] if len(categorias) > 2 else categorias)
 
-        texto = "Tendencias en " + contenido + secciones + " de " + twitter + " del " + string_fecha + "\n"
+        texto = "Tendencias en " + contenido + secciones + " de " + hashtag + " del " + string_fecha + "\n"
 
         top_todo = nlp.top(textos, n=top_max)
         i = 0

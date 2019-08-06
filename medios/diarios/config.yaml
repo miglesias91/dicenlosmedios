@@ -2,6 +2,7 @@ diarios:
   - tag: "lanacion"
     descripcion: "La Nacion"
     twitter: "@LANACION"
+    hashtag: "#LaNacion"
     feed_noticias: "https://www.lanacion.com.ar/ln-news.xml"
     feeds:
       - tag: "politica"
@@ -21,6 +22,7 @@ diarios:
   - tag: "clarin"
     descripcion: "Clarin"
     twitter: "@clarincom"
+    hashtag: "#Clarin"
     feed_noticias: "https://www.clarin.com/sitemap_google_news.xml"
     feeds:
       - tag: "politica"
@@ -41,6 +43,7 @@ diarios:
   - tag: "infobae"
     descripcion: "Infobae"
     twitter: "@infobae"
+    hashtag: "#Infobae"
     feeds:
       - tag: "politica"
         url: "https://www.infobae.com/feeds/rss/sites/politica/"
@@ -60,6 +63,7 @@ diarios:
   - tag: "paginadoce"
     descripcion: "Pagina 12"
     twitter: "@pagina12"
+    hashtag: "#Pagina12"
     feed_noticias: "https://www.pagina12.com.ar/breakingnews.xml"
     feeds:
       - tag: "politica"
@@ -80,11 +84,13 @@ diarios:
   - tag: "eldestape"
     descripcion: "El Destape"
     twitter: "@eldestapeweb"
+    hashtag: "#ElDestape"
     feed_noticias: "https://www.eldestapeweb.com/sitemap-news.xml"
 
   - tag: "telam"
     descripcion: "Telam"
     twitter: "@AgenciaTelam"
+    hashtag: "#Telam"
     feeds:
       - tag: "politica"
         url: "https://www.telam.com.ar/rss2/politica.xml"
@@ -104,6 +110,7 @@ diarios:
   - tag: "perfil"
     descripcion: "Perfil"
     twitter: "@perfilcom"
+    hashtag: "#Perfil"
     feeds:
       - tag: "politica"
         url: "https://www.perfil.com/rss/politica.xml"
@@ -123,6 +130,7 @@ diarios:
   - tag: "ambito"
     descripcion: "Ambito"
     twitter: "@Ambitocom"
+    hashtag: "#AmbitoFinanciero"
     feeds:
       - tag: "politica"
         url: "https://www.ambito.com/rss/politica.xml"
@@ -140,6 +148,7 @@ diarios:
   - tag: "tn"
     descripcion: "TN"
     twitter: "@todonoticias"
+    hashtag: "#TN"
     feed_noticias: "https://tn.com.ar/googlenews.xml"
     feeds:
       - tag: "politica"
@@ -156,6 +165,7 @@ diarios:
   - tag: "casarosada"
     descripcion: "Casa Rosada (2015-2019)"
     twitter: "@CasaRosada"
+    hashtag: "#CasaRosada"
     feed_noticias: "https://www.casarosada.gob.ar/informacion/discursos?format=feed"
     feed_historico: "https://www.casarosada.gob.ar/informacion/archivo?format=feed"
     feeds:

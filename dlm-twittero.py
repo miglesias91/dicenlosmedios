@@ -12,7 +12,7 @@ with open('medios/diarios/config.yaml', 'r') as stream:
         print(exc)
 
 tag_medios = [diario['tag'] for diario in config['diarios'] if diario['tag'] != 'casarosada']
-categorias = ['politica', 'economia', 'sociedad', 'internacional', 'deportes', 'espectaculos', 'cultura']
+categorias = ['politica', 'economia', 'internacional']
 
 tuplas_tag_cat = []
 for tag in tag_medios:
