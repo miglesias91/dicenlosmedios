@@ -149,13 +149,12 @@ def histograma(path, titulo, etiquetas, unidad, data, valfmt="{x:.2f}"):
 
     # plt.show()
 
-def lollipop(path, titulo, etiquetas, unidad, data, valfmt="{x:.2f}"):
+def lollipop(path, colormap, titulo, etiquetas, unidad, data, valfmt="{x:.2f}"):
     # Create a dataframe
     df = pd.DataFrame({'etiquetas':etiquetas, 'valores':data })
 
     a = df.etiquetas
     b = df.valores
-
 
     # Reorder it following the values:
     ordered_df = df.sort_values(by='valores')
@@ -167,16 +166,17 @@ def lollipop(path, titulo, etiquetas, unidad, data, valfmt="{x:.2f}"):
 
     ax.hlines(y=ordered_df.etiquetas, xmin=0, xmax=ordered_df.valores, color='skyblue')
     ax.plot(ordered_df.valores, my_range, "o")
-    
+
     # Add titles and axis names
     if isinstance(valfmt, str):
         valfmt = matplotlib.ticker.StrMethodFormatter(valfmt)
 
+    ax.xaxis.set_major_formatter(valfmt)
+    plt.set_cmap(colormap)
     plt.yticks(my_range, ordered_df.etiquetas)
     plt.title(titulo, loc='left')
     plt.xlabel(unidad)
-    plt.ylabel('Group')
-    plt.savefig(path)
+    plt.savefig(path, bbox_inches='tight',dpi=100)
 
 def cmap_del_dia():
 
@@ -188,6 +188,15 @@ def cmap_del_dia():
     idx = (hoy.year + hoy.month + hoy.day) % len(cmaps)
 
     return cmaps[idx]
+
+def color_del_dia():
+# ARREGLAR ESTOOOO
+    colores = [color for color in matplotlib.colors.get_named_colors_mapping()]
+    
+    hoy = datetime.datetime.now()
+    idx = (hoy.year + hoy.month + hoy.day) % len(colores)
+
+    return colores[idx]
 
 def twittear(texto, path_imagen):
     claves = open("twitter.keys", "r")

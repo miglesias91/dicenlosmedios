@@ -426,7 +426,7 @@ def perfil(parametros):
         conteo = np.array(data)
 
         # utiles.histograma(path="perfil-" + tag + ".jpg", titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="%", data=data)
-        utiles.lollipop(path="perfil-" + tag + ".jpg", titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="%", valfmt="{x:.1f}%", data=data)
+        utiles.lollipop(path="perfil-" + tag + ".jpg", colormap=utiles.color_del_dia(), titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="cantidad de noticias", valfmt="{x:.0f}", data=lista_medio)
 
         # fig, ax = plt.subplots()
         # im, cbar = utiles.heatmap(conteo, etiqueta_medios, categorias, ax=ax, cmap=utiles.cmap_del_dia(), cbarlabel=string_fecha, cbar_format="{x:.0f}%")
