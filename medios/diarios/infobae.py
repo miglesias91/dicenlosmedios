@@ -25,12 +25,43 @@ class Infobae(Diario):
         print("leyendo '" + self.etiqueta + "'...")
 
         tag_regexp = re.compile(r'<[^>]+>')
-        for tag, url_feed in self.feeds.items():
-            for entrada in fp.parse(url_feed).entries:
-                titulo = entrada.title
-                texto = re.sub(tag_regexp,' ',entrada.content[0].value)
-                fecha = dateutil.parser.parse(entrada.published)  - datetime.timedelta(hours=3)
-                url = entrada.link
-                if kiosco.contar_noticias(diario=self.etiqueta, url=url): # si existe ya la noticia (url), no la decargo
-                    continue
-                self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=self.limpiar_texto(texto)))
+        for entrada in fp.parse(self.feed_noticias).entries:
+            url = entrada.link
+            if kiosco.contar_noticias(diario=self.etiqueta, url=url): # si existe ya la noticia (url), no la decargo
+                continue        
+            titulo = entrada.title
+            texto = re.sub(tag_regexp,' ',entrada.content[0].value)
+            fecha = dateutil.parser.parse(entrada.published)  - datetime.timedelta(hours=3)
+
+            categoria = url.split('/')[3]
+            
+            if categoria == "america":
+                categoria = "internacional"
+
+            if categoria == "teleshow":
+                categoria = "espectaculos"
+
+            if categoria == "deportes-2":
+                categoria = "deportes"
+
+            self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=categoria, titulo=titulo, texto=self.limpiar_texto(texto)))
+
+
+        # for tag, url_feed in self.feeds.items():
+        #     for entrada in fp.parse(url_feed).entries:
+        #         titulo = entrada.title
+        #         texto = re.sub(tag_regexp,' ',entrada.content[0].value)
+        #         fecha = dateutil.parser.parse(entrada.published)  - datetime.timedelta(hours=3)
+        #         url = entrada.link
+        #         if kiosco.contar_noticias(diario=self.etiqueta, url=url): # si existe ya la noticia (url), no la decargo
+        #             continue
+        #         self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=tag, titulo=titulo, texto=self.limpiar_texto(texto)))
+
+    def limpiar_texto(self, texto):
+        regexp = re.compile(r'SEGUÍ LEYENDO[^$]+')
+        texto = re.sub(regexp,' ',texto)
+        regexp = re.compile(r'MÁS SOBRE ESTE TEMA[^$]+')
+        texto = re.sub(regexp,' ',texto)
+        regexp = re.compile(r'Seguí leyendo[^$]+')
+        texto = re.sub(regexp,' ',texto)
+        return texto

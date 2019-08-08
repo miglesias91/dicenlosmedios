@@ -180,9 +180,7 @@ def lollipop(path, colormap, titulo, etiquetas, unidad, data, valfmt="{x:.2f}"):
 
 def cmap_del_dia():
 
-    cmaps = ['Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
-            'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
-            'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn']
+    cmaps = plt.colormaps()
     
     hoy = datetime.datetime.now()
     idx = (hoy.year + hoy.month + hoy.day) % len(cmaps)

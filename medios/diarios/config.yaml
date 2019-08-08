@@ -44,6 +44,7 @@ diarios:
     descripcion: "Infobae"
     twitter: "@infobae"
     hashtag: "#Infobae"
+    feed_noticias: "https://www.infobae.com/feeds/rss/"
     feeds:
       - tag: "politica"
         url: "https://www.infobae.com/feeds/rss/sites/politica/"
