@@ -31,7 +31,11 @@ class PaginaDoce(Diario):
             categoria, titulo, texto = self.parsear_noticia(url=url)
             if texto == None:
                 continue
-            self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=categoria, titulo=titulo, texto=texto))
+
+            if categoria not in self.categorias:
+                continue
+                
+            self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=categoria, titulo=titulo, texto=self.limpiar_texto(texto)))
 
     def entradas_feed(self):
         urls_fechas = []
@@ -69,3 +73,8 @@ class PaginaDoce(Diario):
         categoria = feed.find(lambda tag: tag.name == 'div' and tag.get('class') == ['suplement']).text
         signos = string.punctuation + "¡¿\n"
         return categoria.translate(str.maketrans('áéíóúý', 'aeiouy', signos)).strip().lower()
+
+    def limpiar_texto(self, texto):
+        regexp = re.compile(r'Loading tweet ...')
+        texto = re.sub(regexp,' ',texto)
+        return texto

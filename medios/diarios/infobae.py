@@ -44,6 +44,9 @@ class Infobae(Diario):
             if categoria == "deportes-2":
                 categoria = "deportes"
 
+            if categoria not in self.categorias:
+                continue
+
             self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria=categoria, titulo=titulo, texto=self.limpiar_texto(texto)))
 
 

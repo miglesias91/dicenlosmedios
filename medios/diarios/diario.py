@@ -15,6 +15,7 @@ class Diario(Medio):
         self.noticias = []
         self.feeds = {}
         self.feed_noticias = ""
+        self.categorias = []
         self.configurar()
 
     def configurar(self):
@@ -29,9 +30,13 @@ class Diario(Medio):
                 continue
             if 'feed_noticias' in diario:
                 self.feed_noticias = diario['feed_noticias']
+            if 'categorias' in diario:
+                self.categorias = diario['categorias']
             if 'feeds' in diario:
+                self.categorias = []
                 for feed in diario['feeds']:
                     self.feeds[feed['tag']] = feed['url']
+                    self.categorias.append(feed['tag'])
                     
     def leer(self):
         kiosco = Kiosco()

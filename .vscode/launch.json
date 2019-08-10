@@ -25,7 +25,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--leer"]
+            "args":["--leer", "infobae"]
         },
         {
             "name": "dlm-top",
@@ -59,6 +59,14 @@
             "console": "integratedTerminal",
             "args":["--perfil", "--fecha", "20190802"]
         },
+        {
+            "name": "dlm-intensidad",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/dlm.py",
+            "console": "integratedTerminal",
+            "args":["--intensidad", "--fecha", "20190809"]
+        },        
         {
             "name": "dlm-twittero",
             "type": "python",

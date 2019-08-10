@@ -119,20 +119,9 @@ def top_todo(parametros):
         print(texto)
 
         if twittear:
-            # claves = open("twitter.keys", "r")
-            # json_claves = json.load(claves)
-
-            # consumer_key = json_claves['consumer_key']
-            # consumer_secret = json_claves['consumer_secret']
-            # access_token = json_claves['access_token']
-            # access_token_secret = json_claves['access_token_secret']
-            # auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-            # auth.set_access_token(access_token, access_token_secret)
-            # api = tweepy.API(auth)
 
             path_imagen = tag + ".png"
             utiles.nube_de_palabras(path=path_imagen, data=dict(top_todo))
-            # api.update_with_media(filename=path_imagen, status=texto)
             utiles.twittear(texto=texto, path_imagen=path_imagen)
 
 
@@ -381,9 +370,21 @@ def intensidad(parametros):
     im, cbar = utiles.heatmap(conteo, etiqueta_medios, categorias, ax=ax, cmap=utiles.cmap_del_dia(), cbarlabel=string_fecha, cbar_format="{x:.0f}%")
     texts = utiles.annotate_heatmap(im, valfmt="{x:.1f}")
 
+    path_imagen = "intensidad.jpg"
+
     fig.tight_layout()
-    # plt.show()
-    plt.savefig("intensidad.jpg")
+    plt.savefig(path_imagen, bbox_inches='tight',dpi=100)
+
+    if len(categorias) > 0:
+        hashtags_categorias = " #" + " #".join([" #".join(categorias[:-1]),categorias[-1]] if len(categorias) > 2 else categorias)
+
+    medios = list(medios)
+    if len(medios) > 0:
+        hashtags_medios = " #" + " #".join([" #".join(medios[:-1]),medios[-1]] if len(medios) > 2 else medios)
+
+    if twittear:
+        texto = "Porcentaje de noticias x categoría." + hashtags_medios + hashtags_categorias + "."
+        utiles.twittear(texto=texto, path_imagen=path_imagen) 
 
 def perfil(parametros):
     fecha = parametros['fecha']
@@ -423,18 +424,13 @@ def perfil(parametros):
 
         data = []
         data.extend([n*100/total for n in lista_medio])
-        conteo = np.array(data)
 
-        # utiles.histograma(path="perfil-" + tag + ".jpg", titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="%", data=data)
-        utiles.lollipop(path="perfil-" + tag + ".jpg", colormap=utiles.cmap_del_dia(), titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="cantidad de noticias", valfmt="{x:.0f}", data=lista_medio)
+        path_imagen = "perfil-" + tag + ".jpg"
+        utiles.lollipop(path=path_imagen, colormap=utiles.cmap_del_dia(), titulo="Resumen de " + diario['twitter'] + " - " + string_fecha, etiquetas=categorias, unidad="cantidad de noticias", valfmt="{x:.0f}", data=lista_medio)
 
-        # fig, ax = plt.subplots()
-        # im, cbar = utiles.heatmap(conteo, etiqueta_medios, categorias, ax=ax, cmap=utiles.cmap_del_dia(), cbarlabel=string_fecha, cbar_format="{x:.0f}%")
-        # texts = utiles.annotate_heatmap(im, valfmt="{x:.1f}")
-
-        # fig.tight_layout()
-        # plt.show()
-        # plt.savefig("perfil-" + tag + ".jpg")
+        if twittear:
+            texto = "Suma de noticias de #" + tag + " del " + string_fecha + ", en cada una de sus secciones."
+            utiles.twittear(texto=texto, path_imagen=path_imagen)
 
 def usage():
     print("dlm (dicen-los-medios) v1.1")

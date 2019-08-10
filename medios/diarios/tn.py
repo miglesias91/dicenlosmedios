@@ -45,6 +45,9 @@ class TN(Diario):
             if categoria == "show":
                 categoria = "espectaculos"
 
+            if categoria not in self.categorias:
+                continue
+
             urls_fechas_titulo_categoria.append((url, fecha, titulo, categoria))
             
         return urls_fechas_titulo_categoria
