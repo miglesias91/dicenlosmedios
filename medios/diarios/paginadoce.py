@@ -66,6 +66,9 @@ class PaginaDoce(Diario):
         if categoria == "el mundo":
             categoria = "internacional"
 
+        if categoria == "cultura y espectaculos":
+            categoria = "espectaculos"            
+
         return  categoria, articulo.title, articulo.text
 
     def parsear_categoria(self, html):
