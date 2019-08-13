@@ -20,37 +20,7 @@ class CasaRosada(Diario):
     def __init__(self):
         Diario.__init__(self, "casarosada")
 
-    def leer_historico(self):
-        with open('medios/diarios/config.yaml', 'r') as stream:
-            try:
-                config = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-
-        url_historica = ""
-        for diario in config['diarios']:
-            if diario['tag'] == self.etiqueta:
-                url_historica = diario['feed_historico']
-                break
-
-        entradas = []
-        url_historica = url_historica + "&start="
-        index = 0
-        feed = fp.parse(url_historica + str(index))
-        intentos = 0
-        while feed.bozo == 1 and intentos < 5:
-            feed = fp.parse(url_historica + str(index))
-            intentos += 1
-
-        while len(feed.entries) > 0:
-            entradas.extend(feed.entries)
-            index += 40
-            feed = fp.parse(url_historica + str(index))
-            intentos = 0
-            while feed.bozo == 1 and intentos < 5:
-                feed = fp.parse(url_historica + str(index))
-                intentos += 1      
-
+    def leer_historico(self): 
         # TERMINAR DE ARMAR ESTO !!!!
         entradas = self.parsear_entradas()
 
@@ -120,10 +90,69 @@ class CasaRosada(Diario):
 
 
     def parsear_entradas(self):
-        pass
+        with open('medios/diarios/config.yaml', 'r') as stream:
+            try:
+                config = yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
 
-    def parsear_url_discursos(self, entradas):
-        pass
+        url_historica = ""
+        for diario in config['diarios']:
+            if diario['tag'] == self.etiqueta:
+                url_historica = diario['feed_historico']
+                break
+
+        entradas = []
+        url_historica = url_historica + "&start="
+        index = 0
+        feed = fp.parse(url_historica + str(index))
+        intentos = 0
+        while feed.bozo == 1 and intentos < 5:
+            feed = fp.parse(url_historica + str(index))
+            intentos += 1
+
+        while len(feed.entries) > 0 and index < 50:
+            entradas.extend(feed.entries)
+            print("entradas: " + str(len(entradas)))
+            index += 40
+            feed = fp.parse(url_historica + str(index))
+            intentos = 0
+            while feed.bozo == 1 and intentos < 5:
+                feed = fp.parse(url_historica + str(index))
+                intentos += 1
+
+        return [(e.title, dateutil.parser.parse(e.published), e.link) for e in entradas]
+
+    def parsear_urls_discursos(self, entradas):
+
+        urls_discursos = []
+        fecha_asuncion_cfk =  dateutil.parser.parse("Mon, 10 Dec 2007 18:36:41 +0000")
+        for titulo, fecha, url in entradas:
+            if fecha > fecha_asuncion_cfk:
+                # index 7557
+                req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                
+                leyo_ok = False
+                html_posteo = None
+                i = 0
+                while leyo_ok == False and i < 5:
+                    try:
+                        html_posteo = bs(urlopen(req).read(), 'html.parser')
+                        leyo_ok = True
+                    except:
+                        i += 1
+                        leyo_ok = False
+                
+                e_link = None
+                if html_posteo:
+                    e_link = html_posteo.find(lambda tag: tag.name == 'a' and tag.get('class') == ['discurso', 'btn', 'btn-primary'])
+                if e_link and 'href' in e_link.attrs:
+                    url_discurso = 'https://www.casarosada.gob.ar' + e_link.attrs['href']
+                    urls_discursos.append((url_discurso, titulo, fecha))
+            else:
+                urls_discursos.append((url, titulo, fecha))
+
+        return urls_discursos
 
     def parsear_discursos(self, urls_discursos):
-        pass
+        return []
