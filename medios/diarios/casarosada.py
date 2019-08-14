@@ -20,19 +20,13 @@ class CasaRosada(Diario):
     def __init__(self):
         Diario.__init__(self, "casarosada")
 
-    def leer_historico(self): 
-        # TERMINAR DE ARMAR ESTO !!!!
+    def leer_historico(self):
         entradas = self.parsear_entradas()
-
         urls_discursos = self.parsear_urls_discursos(entradas)
-
         discursos = self.parsear_discursos(urls_discursos)
 
-        discursos = []
-        for entrada in entradas:
-            titulo = entrada.title
-            feed = bs(urllib.request.urlopen(entrada.link).read(), 'html.parser')
-            elemento = feed.find(name='div', attrs={'class':'discurso btn btn-primary'})
+        for titulo, fecha, texto, url in discursos:
+            self.noticias.append(Noticia(fecha=fecha, url=url, diario=self.etiqueta, categoria='todo', titulo=titulo, texto=self.limpiar_texto(texto)))
 
 
     def leer_todo(self):
@@ -121,13 +115,13 @@ class CasaRosada(Diario):
                 feed = fp.parse(url_historica + str(index))
                 intentos += 1
 
-        return [(e.title, dateutil.parser.parse(e.published), e.link) for e in entradas]
+        return [(dateutil.parser.parse(e.published), e.link) for e in entradas]
 
     def parsear_urls_discursos(self, entradas):
 
         urls_discursos = []
-        fecha_asuncion_cfk =  dateutil.parser.parse("Mon, 10 Dec 2007 18:36:41 +0000")
-        for titulo, fecha, url in entradas:
+        fecha_asuncion_cfk =  dateutil.parser.parse("Mon, 10 Dec 2007 18:36:41")
+        for fecha, url in entradas:
             if fecha > fecha_asuncion_cfk:
                 # index 7557
                 req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -148,11 +142,30 @@ class CasaRosada(Diario):
                     e_link = html_posteo.find(lambda tag: tag.name == 'a' and tag.get('class') == ['discurso', 'btn', 'btn-primary'])
                 if e_link and 'href' in e_link.attrs:
                     url_discurso = 'https://www.casarosada.gob.ar' + e_link.attrs['href']
-                    urls_discursos.append((url_discurso, titulo, fecha))
+                    urls_discursos.append((fecha, url_discurso))
             else:
-                urls_discursos.append((url, titulo, fecha))
+                urls_discursos.append((fecha, url))
 
         return urls_discursos
 
     def parsear_discursos(self, urls_discursos):
-        return []
+        discursos = []
+        for fecha, url in urls_discursos:            
+            leyo_ok = False
+            html_posteo = None
+            i = 0
+            articulo = None
+            while leyo_ok == False and i < 5:
+                articulo = np.Article(url=url, language='es')
+                try:
+                    articulo.download()
+                    articulo.parse()
+                    leyo_ok = True
+                except:
+                    i += 1
+                    leyo_ok = False
+
+            texto = articulo.text
+
+            discursos.append((articulo.title, fecha, articulo.text, url))
+        return discursos
