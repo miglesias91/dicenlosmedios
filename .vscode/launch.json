@@ -73,6 +73,14 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm-twittero.py",
             "console": "integratedTerminal"
+        },        
+        {
+            "name": "dlp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceRoot}/dlp.py",
+            "console": "integratedTerminal",
+            "args":["--twittear", "--fecha", "20191001"]
         }
     ]
 }

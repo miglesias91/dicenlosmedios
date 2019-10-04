@@ -432,7 +432,7 @@ def perfil(parametros):
             texto = "Suma de noticias de #" + tag + " del " + string_fecha + ", en cada una de sus secciones."
             utiles.twittear(texto=texto, path_imagen=path_imagen)
 
-def usage():
+def usage(parametros):
     print("dlm (dicen-los-medios) v1.1")
     print("ACCIONES")
     print("--leer [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - actualiza las noticias de todos los diarios, a menos que se especifiquen los MEDIOS en particular")
@@ -456,13 +456,13 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-verbos=", "intensidad", "perfil", "fecha=", "categorias=", "twittear", "solo-titulos"])
     except getopt.GetoptError as err:
         print(err)
-        usage()
+        usage(None)
         sys.exit(2)
 
     parametros = {'medios':args, 'fecha':datetime.datetime.now().date(), 'twittear':False, 'solo_titulos':False, 'categorias':''}
     for o, a in opts:
         if o == "--help" or o == "-h":
-            usage()
+            accion=usage
         elif o == "--leer":
             accion=leer_medios
         elif o == "--top-todo":
