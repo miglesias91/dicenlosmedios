@@ -105,7 +105,7 @@ class CasaRosada(Diario):
             feed = fp.parse(url_historica + str(index))
             intentos += 1
 
-        while len(feed.entries) > 0 and index < 50:
+        while len(feed.entries) > 0:
             entradas.extend(feed.entries)
             print("entradas: " + str(len(entradas)))
             index += 40
@@ -120,7 +120,7 @@ class CasaRosada(Diario):
     def parsear_urls_discursos(self, entradas):
 
         urls_discursos = []
-        fecha_asuncion_cfk =  dateutil.parser.parse("Mon, 10 Dec 2007 18:36:41")
+        fecha_asuncion_cfk =  dateutil.parser.parse("Mon, 10 Dec 2007 18:36:41 +0000")
         for fecha, url in entradas:
             if fecha > fecha_asuncion_cfk:
                 # index 7557

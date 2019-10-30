@@ -39,6 +39,13 @@ def leer_medio(medio):
     kiosco = Kiosco()
     kiosco.actualizar_diario(medio)
 
+def leer_historico(parametros):
+    cr = CasaRosada()
+    # cr.leer_todo()
+    cr.leer_historico()
+    kiosco = Kiosco()
+    kiosco.actualizar_diario(cr)
+
 def leer_medios(parametros):
     medios_a_leer = set(parametros['medios'])
 
@@ -436,6 +443,7 @@ def usage(parametros):
     print("dlm (dicen-los-medios) v1.1")
     print("ACCIONES")
     print("--leer [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - actualiza las noticias de todos los diarios, a menos que se especifiquen los MEDIOS en particular")
+    print("--leer-historico - lee historico de 'casarosada': discursos desde la fecha hasta 2003")
     print("--top-todo [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de terminos, palabras, etc, etct, de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-terminos [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de terminos de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
     print("--top-personas [MAX] [MEDIO_1] [MEDIO_2] ... [MEDIO_N] - muestra el top MAX de personas de todos los medios, a menos que se especifiquen los MEDIOS a analizar")
@@ -453,7 +461,7 @@ def main():
     accion = None
     top_max = 10
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "top-todo=", "top-terminos=", "top-personas=", "top-verbos=", "intensidad", "perfil", "fecha=", "categorias=", "twittear", "solo-titulos"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help", "leer", "leer-historico", "top-todo=", "top-terminos=", "top-personas=", "top-verbos=", "intensidad", "perfil", "fecha=", "categorias=", "twittear", "solo-titulos"])
     except getopt.GetoptError as err:
         print(err)
         usage(None)
@@ -465,6 +473,8 @@ def main():
             accion=usage
         elif o == "--leer":
             accion=leer_medios
+        elif o == "--leer-historico":
+            accion=leer_historico
         elif o == "--top-todo":
             try:
                 top_max = int(a)
