@@ -33,12 +33,12 @@ from bd.entidades import Kiosco
 import utiles
 
 def twittear_hilo(parametros):
-    tw_intro = {'texto': "Análisis de discurso del string_fecha de #MauricioMacri.", 'media': ['intro0.png','intro1.png']}
-    tw_terminos = { 'texto': 'tweet con terminos', 'media': ["dlp_terminos.png"] }
-    tw_verbos = {'texto': 'tweet con verbos', 'media': ["dlp_verbos.png"]}
+    # tw_intro = {'texto': "Análisis de discurso del string_fecha de #MauricioMacri.", 'media': ['intro0.png','intro1.png']}
+    # tw_terminos = { 'texto': '@dicenlospresis tweet con terminos', 'media': ["dlp_terminos.png"] }
+    # tw_verbos = {'texto': '@dicenlospresis tweet con verbos', 'media': ["dlp_verbos.png"]}
 
-    utiles.twittear_hilo([tw_intro, tw_terminos, tw_verbos])
-    return 
+    # utiles.twittear_hilo([tw_intro, tw_terminos, tw_verbos], cuenta="dlp")
+    # return 
     fecha = parametros['fecha']
 
     kiosco = Kiosco()
@@ -51,33 +51,35 @@ def twittear_hilo(parametros):
     nlp.separador = ''
     
     for texto in textos:
-        string_fecha = ""
-        if type(fecha) is dict:
-            string_fecha = fecha['desde'].strftime("%d.%m.%Y") + " al " + fecha['hasta'].strftime("%d.%m.%Y")
-        else:
-            string_fecha = fecha.strftime("%d.%m.%Y")
 
-        tw_intro = tweet_intro(texto, string_fecha)
+        # tw_intro = tweet_intro(texto, string_fecha) # ACA ESTA EL ERROR; STRING FECHA ESTA EN FORMADO MM.DD.YYYY, DEBERIA ESTAR EN YYYY.MM.DD
+        tw_intro = tweet_intro(texto, fecha)
 
         kiosco = Kiosco()
 
-        top_terminos = nlp.top_terminos(textos=[texto])
-        top_verbos = nlp.top_verbos(textos=[texto])
+        top_terminos = nlp.top_terminos(textos=[texto], n=15)
+        top_verbos = nlp.top_verbos(textos=[texto], n=15)
 
         tw_terminos = tweet_terminos(top_terminos)
         tw_verbos = tweet_verbos(top_verbos)
 
         if parametros['twittear']:
-            utiles.twittear_hilo([tw_intro, tw_terminos, tw_verbos])
+            utiles.twittear_hilo([tw_intro, tw_terminos, tw_verbos], cuenta="dlp")
 
-def tweet_intro(texto, string_fecha):
+def tweet_intro(texto, fecha):
     font = 'calibri.ttf'
     paths_imagenes = utiles.texto_en_imagenes(texto, font, 15, 800, 600, "intro")
 
-    return {'texto': "Análisis de discurso del " + string_fecha + " de #MauricioMacri.", 'media': paths_imagenes}
+    string_fecha = ""
+    if type(fecha) is dict:
+        string_fecha = fecha['desde'].strftime("%d.%m.%Y") + " al " + fecha['hasta'].strftime("%d.%m.%Y")
+    else:
+        string_fecha = fecha.strftime("%d.%m.%Y")
+
+    return {'texto': "Análisis de discurso del " + string_fecha + " de " + hashtag_presi(fecha.strftime("%Y%m%d")) + ".", 'media': paths_imagenes}
 
 def tweet_terminos(top_terminos):
-    texto = "Verbos tendencia:\n"
+    texto = "Términos tendencia:\n"
 
     i = 0
     for nombre, m in top_terminos:
@@ -96,11 +98,15 @@ def tweet_terminos(top_terminos):
             texto += linea
 
     print(texto)
+    path_imagen="dlp_terminos.png"
+    # utiles.nube_de_palabras(path=path_imagen, data=dict(top_terminos))
+    # utiles.lollipop(path=path_imagen, data=dict(top_terminos))
+    utiles.lollipop(path=path_imagen, colormap=utiles.cmap_del_dia(), titulo="Tendencia de términos en el discurso", etiquetas=[nombre for nombre, m in top_terminos], unidad="cantidad de apariciones", valfmt="{x:.0f}", data=[m for nombre, m in top_terminos])
 
-    return {'texto': texto, 'media': ["dlp_terminos.png"]}
+    return {'texto': texto, 'media': [path_imagen]}
 
 def tweet_verbos(top_verbos):
-    texto = "Terminos tendencia:\n"
+    texto = "Verbos tendencia:\n"
 
     i = 0
     for nombre, m in top_verbos:
@@ -119,8 +125,24 @@ def tweet_verbos(top_verbos):
             texto += linea
 
     print(texto)
+    path_imagen="dlp_verbos.png"
+    # utiles.nube_de_palabras(path=path_imagen, data=dict(top_verbos))
+    utiles.lollipop(path=path_imagen, colormap=utiles.cmap_del_dia(), titulo="Tendencia de verbos en el discurso", etiquetas=[nombre for nombre, m in top_verbos], unidad="cantidad de apariciones", valfmt="{x:.0f}", data=[m for nombre, m in top_verbos])
 
     return {'texto': texto, 'media': ["dlp_verbos.png"]}
+
+def hashtag_presi(string_fecha):
+    if string_fecha >= "20191210":
+        return "#AlbertoFernández"
+
+    if string_fecha < "20191210" and string_fecha >= "20151210":
+        return "#MauricioMacri"
+
+    if string_fecha < "20151210" and string_fecha >= "20071210":
+        return "#CristinaFernández"
+
+    if string_fecha < "20071210":
+        return "#NéstorKirchner"
 
 def usage(parametros):
     print("dlp (dicen-los-presidentes) v1.1")

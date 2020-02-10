@@ -129,7 +129,7 @@ def top_todo(parametros):
 
             path_imagen = tag + ".png"
             utiles.nube_de_palabras(path=path_imagen, data=dict(top_todo))
-            utiles.twittear(texto=texto, path_imagen=path_imagen)
+            utiles.twittear(texto=texto, path_imagen=path_imagen, cuenta="dlm")
 
 
 def top_terminos(parametros):
@@ -391,7 +391,7 @@ def intensidad(parametros):
 
     if twittear:
         texto = "Porcentaje de noticias x categoría." + hashtags_medios + hashtags_categorias + "."
-        utiles.twittear(texto=texto, path_imagen=path_imagen) 
+        utiles.twittear(texto=texto, path_imagen=path_imagen, cuenta="dlm") 
 
 def perfil(parametros):
     fecha = parametros['fecha']
@@ -437,7 +437,7 @@ def perfil(parametros):
 
         if twittear:
             texto = "Suma de noticias de #" + tag + " del " + string_fecha + ", en cada una de sus secciones."
-            utiles.twittear(texto=texto, path_imagen=path_imagen)
+            utiles.twittear(texto=texto, path_imagen=path_imagen, cuenta="dlm")
 
 def usage(parametros):
     print("dlm (dicen-los-medios) v1.1")

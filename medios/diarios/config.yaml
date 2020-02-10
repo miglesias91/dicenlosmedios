@@ -252,8 +252,8 @@ diarios:
     descripcion: "Casa Rosada (2015-2019)"
     twitter: "@CasaRosada"
     hashtag: "#CasaRosada"
-    feed_noticias: "https://www.casarosada.gob.ar/informacion/discursos?format=feed"
+    feed_noticias: "https://www.casarosada.gob.ar/informacion/discursos/37-informacion?format=feed"
     feed_historico: "https://www.casarosada.gob.ar/informacion/archivo?format=feed"
     feeds:
       - tag: "todo"
-        url: "https://www.casarosada.gob.ar/informacion/discursos?format=feed"
+        url: "https://www.casarosada.gob.ar/informacion/discursos/37-informacion?format=feed"
