@@ -33,7 +33,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--top-todo", "20", "--categorias", "deportes", "--fecha", "20190729" ,"paginadoce"]
+            "args":["--top-todo", "20", "--categorias", "deportes", "--fecha", "20191229" ,"paginadoce"]
         },
         {
             "name": "dlm-top-personas",
@@ -49,7 +49,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--top-verbos", "100", "--categorias", "economia", "--fecha", "20190729", "clarin"]
+            "args":["--top-verbos", "100", "--categorias", "economia", "--fecha", "20191229", "clarin"]
         },
         {
             "name": "dlm-perfil",
@@ -57,7 +57,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--perfil", "--fecha", "20190802"]
+            "args":["--perfil", "--fecha", "20191202"]
         },
         {
             "name": "dlm-intensidad",
@@ -65,7 +65,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/dlm.py",
             "console": "integratedTerminal",
-            "args":["--intensidad", "--fecha", "20190809"]
+            "args":["--intensidad", "--fecha", "20191209"]
         },        
         {
             "name": "dlm-twittero",

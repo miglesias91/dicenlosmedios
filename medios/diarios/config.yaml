@@ -248,6 +248,23 @@ diarios:
       - "estilo"
       - "opinion"
 
+  - tag: "popular"
+    descripcion: "Diario Popular"
+    twitter: "@populardiario"
+    hashtag: "#DiarioPopular"
+    feed_noticias: "https://www.diariopopular.com.ar/sitemap.xml"
+    categorias:
+      - "general"
+      - "politica"
+      - "economia"
+      - "internacionales"
+      - "policiales"
+      - "deportes"
+      - "espectaculos"
+      - "tecnologia"
+      - "salud"
+      - "horoscopo"
+
   - tag: "casarosada"
     descripcion: "Casa Rosada (2015-2019)"
     twitter: "@CasaRosada"
